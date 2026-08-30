@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Regression — A Complete Course for Machine Learning</title>
+<style>
+:root{
+  --purple:#6C4AB6;
+  --purple-dark:#4E3487;
+  --pink:#E8558F;
+  --teal:#17A398;
+  --teal-dark:#0F7A70;
+  --bg:#F7F7FB;
+  --paper:#FFFFFF;
+  --ink:#23222A;
+  --ink-soft:#54525E;
+  --line:#E4E1EE;
+  --code-bg:#F1EEFC;
+  --amber:#C97A1B;
+  --red:#C23B4B;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Georgia","Iowan Old Style","Palatino Linotype",serif;
+  color:var(--ink);
+  background:var(--bg);
+  line-height:1.65;
+  font-size:17px;
+}
+h1,h2,h3,h4,.ui,.nav,button,.pill,.tag,.progressbar,.toc,.covercard{
+  font-family:"Helvetica Neue",Arial,sans-serif;
+}
+a{color:var(--purple-dark);}
+.layout{display:flex; max-width:1400px; margin:0 auto;}
+/* ---------- Sidebar / TOC ---------- */
+.sidebar{
+  width:290px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto;
+  background:var(--paper); border-right:1px solid var(--line); padding:22px 18px 60px;
+}
+.sidebar h4{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--purple); margin:18px 0 8px;}
+.sidebar a.toclink{display:block; font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:5px 8px; border-radius:6px; margin-bottom:1px;}
+.sidebar a.toclink:hover{background:var(--code-bg); color:var(--purple-dark);}
+.sidebar a.toclink.active{background:var(--purple); color:#fff;}
+#searchBox{width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px; margin-bottom:6px; font-family:inherit;}
+.brand{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+.brand .dot{width:12px;height:12px;border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--pink));}
+.brand span{font-weight:800; font-size:14px; letter-spacing:.02em;}
+/* ---------- Main content ---------- */
+.main{flex:1; min-width:0; padding:0 0 120px;}
+.progresswrap{position:sticky; top:0; z-index:20; height:4px; background:var(--line);}
+.progressbar{height:4px; background:linear-gradient(90deg,var(--purple),var(--pink),var(--teal)); width:0%;}
+.cover{
+  min-height:78vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+  padding:70px 64px; background:
+    radial-gradient(circle at 15% 20%, rgba(108,74,182,.14), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(232,85,143,.14), transparent 45%),
+    var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.cover .kicker{font-family:"Helvetica Neue",Arial,sans-serif; letter-spacing:.18em; text-transform:uppercase; font-size:12px; color:var(--teal-dark); font-weight:700; margin-bottom:18px;}
+.cover h1{font-size:52px; line-height:1.08; margin:0 0 18px; max-width:820px; font-family:"Helvetica Neue",Arial,sans-serif; font-weight:800; letter-spacing:-0.01em;}
+.cover h1 .grad{background:linear-gradient(120deg,var(--purple),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.cover p.sub{font-size:18px; color:var(--ink-soft); max-width:640px; margin-bottom:28px;}
+.cover .metarow{display:flex; gap:10px; flex-wrap:wrap;}
+.pill{font-family:"Helvetica Neue",Arial,sans-serif; font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:99px; background:var(--code-bg); color:var(--purple-dark); border:1px solid var(--line);}
+.chapter{padding:56px 64px; border-bottom:1px solid var(--line); background:var(--paper); scroll-margin-top:10px;}
+.chapter:nth-of-type(even){background:var(--paper);}
+.chnum{font-family:"Helvetica Neue",Arial,sans-serif; font-size:13px; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--purple),var(--pink)); display:inline-flex; align-items:center; justify-content:center; width:auto; padding:6px 14px; border-radius:8px; letter-spacing:.06em;}
+.chapter h2{font-size:32px; margin:16px 0 6px; font-family:"Helvetica Neue",Arial,sans-serif; font-weight:800;}
+.chapter .deck{color:var(--ink-soft); font-size:16.5px; margin-bottom:28px; max-width:760px;}
+.diff{display:inline-block; font-family:"Helvetica Neue",Arial,sans-serif; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:99px; margin-left:10px; vertical-align:middle;}
+.diff.beg{background:#E4F6EE; color:#1C7A46;}
+.diff.mid{background:#FFF4DA; color:#8A5A00;}
+.diff.adv{background:#FBE3E7; color:#A5253A;}
+h3{font-family:"Helvetica Neue",Arial,sans-serif; font-size:21px; font-weight:700; margin:34px 0 12px;}
+h4{font-family:"Helvetica Neue",Arial,sans-serif; font-size:16.5px; font-weight:700; margin:22px 0 8px; color:var(--purple-dark);}
+p{max-width:760px;}
+.card{background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:18px 0; max-width:760px; break-inside:avoid;}
+.box{border-radius:14px; padding:20px 22px; margin:20px 0; max-width:760px; break-inside:avoid; border-left:5px solid; background:var(--bg);}
+.box h4{margin-top:0;}
+.box.formula{border-color:var(--purple); background:linear-gradient(180deg,#FBFAFF,#F4F1FC);}
+.box.formula .f{font-family:"Cambria Math","Georgia",serif; font-size:22px; text-align:center; padding:10px 0; color:var(--purple-dark);}
+.box.definition{border-color:var(--teal); background:linear-gradient(180deg,#F7FDFC,#EFFAF8);}
+.box.why{border-color:var(--pink); background:linear-gradient(180deg,#FFF8FA,#FEF0F4);}
+.box.mistake{border-color:var(--red); background:linear-gradient(180deg,#FFF9F9,#FDF0F1);}
+.box.interview{border-color:var(--amber); background:linear-gradient(180deg,#FFFBF4,#FFF4E2);}
+.box.remember{border-color:var(--purple-dark); background:linear-gradient(180deg,#F9F8FF,#F1EEFC);}
+.box.dontmemorize{border-color:#8E8AA6; background:#F3F2F8;}
+.box.example{border-color:var(--teal-dark); background:#F5FBFA;}
+.tagline{font-family:"Helvetica Neue",Arial,sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; display:block;}
+.formula.box .tagline{color:var(--purple-dark);} .definition.box .tagline{color:var(--teal-dark);}
+.why.box .tagline{color:var(--pink);} .mistake.box .tagline{color:var(--red);}
+.interview.box .tagline{color:var(--amber);} .remember.box .tagline{color:var(--purple-dark);}
+.dontmemorize.box .tagline{color:#5F5B78;} .example.box .tagline{color:var(--teal-dark);}
+table{border-collapse:collapse; margin:18px 0; max-width:760px; width:100%; font-size:15.5px; break-inside:avoid;}
+th,td{border:1px solid var(--line); padding:9px 12px; text-align:left;}
+th{background:var(--code-bg); font-family:"Helvetica Neue",Arial,sans-serif; font-size:13px; font-weight:700; color:var(--purple-dark);}
+tr:nth-child(even) td{background:#FBFBFD;}
+code, pre{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;}
+code{background:var(--code-bg); padding:1px 6px; border-radius:5px; font-size:14.5px; color:var(--purple-dark);}
+pre{background:#211F2B; color:#EDEBFA; padding:18px 20px; border-radius:12px; overflow-x:auto; max-width:760px; font-size:14px; line-height:1.6; break-inside:avoid;}
+pre code{background:none; color:inherit; padding:0;}
+.glossline{max-width:760px; border-bottom:1px dashed var(--line); padding:10px 0;}
+.glossline b{color:var(--purple-dark);}
+details{max-width:760px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 16px; margin:10px 0; break-inside:avoid;}
+summary{cursor:pointer; font-family:"Helvetica Neue",Arial,sans-serif; font-weight:700; color:var(--purple-dark); font-size:14px;}
+.checklist{list-style:none; padding:0; max-width:760px;}
+.checklist li{padding:7px 0; font-size:16px;}
+.checklist li:before{content:"☐ "; color:var(--purple);}
+.widget{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px; max-width:760px; margin:22px 0; break-inside:avoid;}
+.widget .controls{display:flex; flex-wrap:wrap; gap:14px; align-items:center; font-family:"Helvetica Neue",Arial,sans-serif; font-size:13.5px; margin-bottom:10px;}
+.widget .controls label{display:flex; align-items:center; gap:6px; color:var(--ink-soft);}
+.widget .readout{font-family:"Helvetica Neue",Arial,sans-serif; font-size:13.5px; color:var(--purple-dark); font-weight:700; margin-top:8px;}
+.widget button{font-family:"Helvetica Neue",Arial,sans-serif; font-size:13px; font-weight:600; border:1px solid var(--line); background:var(--code-bg); color:var(--purple-dark); padding:6px 12px; border-radius:8px; cursor:pointer;}
+.widget button.active, .widget button:hover{background:var(--purple); color:#fff; border-color:var(--purple);}
+.widget input[type=range]{accent-color:var(--purple);}
+.widget svg{width:100%; height:auto; display:block; background:#FCFCFF; border-radius:10px;}
+.wcaption{font-size:13px; color:var(--ink-soft); font-family:"Helvetica Neue",Arial,sans-serif; margin-top:6px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px; max-width:760px;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; max-width:760px;}
+.mini{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center;}
+.mini svg{width:100%; height:auto;}
+.mini p{font-size:12.5px; color:var(--ink-soft); margin:6px 0 0;}
+.backtop{position:fixed; bottom:22px; right:22px; width:44px; height:44px; border-radius:50%; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 6px 18px rgba(108,74,182,.35); z-index:30; font-family:"Helvetica Neue",Arial,sans-serif; font-size:18px;}
+.navbtnrow{display:flex; justify-content:space-between; margin-top:26px; max-width:760px; font-family:"Helvetica Neue",Arial,sans-serif;}
+.navbtnrow a{text-decoration:none; font-size:13.5px; font-weight:700; color:var(--purple-dark); background:var(--code-bg); padding:9px 16px; border-radius:9px; border:1px solid var(--line);}
+.tocsearchresult{display:none;}
+.five-things{list-style:none; padding:0;}
+.five-things li{padding:8px 0 8px 34px; position:relative; max-width:760px;}
+.five-things li:before{content:counter(fc); counter-increment:fc; position:absolute; left:0; top:6px; width:24px; height:24px; border-radius:50%; background:var(--pink); color:#fff; font-family:"Helvetica Neue",Arial,sans-serif; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center;}
+.five-things{counter-reset:fc;}
+::selection{background:#E8D8FF;}
+@media (max-width: 900px){
+  .sidebar{display:none;}
+  .chapter, .cover{padding:36px 20px;}
+  .grid2,.grid3{grid-template-columns:1fr;}
+}
+/* ---------------- PRINT ---------------- */
+@media print{
+  body{background:#fff; font-size:12.5pt;}
+  .sidebar, .backtop, #searchBox, .no-print, .widget .controls, .navbtnrow{display:none !important;}
+  .layout{display:block;}
+  .progresswrap{display:none;}
+  .chapter, .cover{padding:0 0 24px; border:none; page-break-after:auto;}
+  .chapter{page-break-before:always; break-before:page;}
+  .card,.box,table,pre,details,.widget,.mini{break-inside:avoid; box-shadow:none;}
+  a{color:var(--ink); text-decoration:none;}
+  .cover{min-height:auto; background:#fff;}
+  .widget svg{background:#fff;}
+  details{border:1px solid #ccc;}
+  summary{display:none;}
+  details[open]{display:block;}
+  details:not([open]) .print-answer{display:block;}
+}
+</style>
+</head>
+<body>
+
+<div class="progresswrap"><div class="progressbar" id="progressbar"></div></div>
+
+<div class="layout">
+  <!-- SIDEBAR / TOC -->
+  <nav class="sidebar no-print">
+    <div class="brand"><div class="dot"></div><span>LINEAR REGRESSION</span></div>
+    <input type="text" id="searchBox" placeholder="Search this course…" oninput="filterToc(this.value)">
+    <div id="tocList">
+      <h4>Front Matter</h4>
+      <a class="toclink" href="#cover">Title Page</a>
+      <a class="toclink" href="#ch0">0 · How to Use This Course</a>
+      <h4>Foundations</h4>
+      <a class="toclink" href="#ch1">1 · The Big Picture</a>
+      <a class="toclink" href="#ch2">2 · What Does "Linear" Mean?</a>
+      <a class="toclink" href="#ch3">3 · Slope and Intercept</a>
+      <h4>The Core Idea</h4>
+      <a class="toclink" href="#ch4">4 · Finding the Best Line</a>
+      <a class="toclink" href="#ch5">5 · Least Squares</a>
+      <a class="toclink" href="#ch6">6 · The Mathematics</a>
+      <a class="toclink" href="#ch7">7 · Full Worked Example</a>
+      <a class="toclink" href="#ch8">8 · Geometric Intuition</a>
+      <a class="toclink" href="#ch9">9 · Optimization Intuition</a>
+      <h4>Multiple Regression</h4>
+      <a class="toclink" href="#ch10">10 · Multiple Linear Regression</a>
+      <a class="toclink" href="#ch11">11 · Matrix Form</a>
+      <h4>Evaluation</h4>
+      <a class="toclink" href="#ch12">12 · Train/Test Split</a>
+      <a class="toclink" href="#ch13">13 · Model Evaluation</a>
+      <a class="toclink" href="#ch14">14 · R² Score</a>
+      <a class="toclink" href="#ch15">15 · Correlation vs Regression</a>
+      <h4>Diagnostics</h4>
+      <a class="toclink" href="#ch16">16 · Assumptions</a>
+      <a class="toclink" href="#ch17">17 · Residual Analysis</a>
+      <a class="toclink" href="#ch18">18 · Multicollinearity</a>
+      <a class="toclink" href="#ch19">19 · Outliers &amp; Influence</a>
+      <h4>Beyond the Basics</h4>
+      <a class="toclink" href="#ch20">20 · Feature Scaling</a>
+      <a class="toclink" href="#ch21">21 · Categorical Variables</a>
+      <a class="toclink" href="#ch22">22 · Polynomial Regression</a>
+      <a class="toclink" href="#ch23">23 · Regularization</a>
+      <a class="toclink" href="#ch24">24 · Bias &amp; Variance</a>
+      <h4>Practice</h4>
+      <a class="toclink" href="#ch25">25 · Complete ML Workflow</a>
+      <a class="toclink" href="#ch26">26 · Linear Regression in Python</a>
+      <a class="toclink" href="#ch27">27 · Practical Project</a>
+      <a class="toclink" href="#ch28">28 · Common Mistakes</a>
+      <a class="toclink" href="#ch29">29 · Interview Prep</a>
+      <h4>Wrap-Up</h4>
+      <a class="toclink" href="#ch30">30 · Visual Mental Models</a>
+      <a class="toclink" href="#ch31">31 · Cheat Sheet</a>
+      <a class="toclink" href="#ch32">32 · Final Knowledge Test</a>
+      <a class="toclink" href="#glossary">Glossary</a>
+      <a class="toclink" href="#finalchecklist">Final Checklist</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+  <section class="cover" id="cover">
+    <div class="kicker">A Self-Study Textbook · Print-Ready</div>
+    <h1>Linear Regression<br><span class="grad">from first intuition to interview-ready mastery</span></h1>
+    <p class="sub">A complete beginner-to-practitioner course covering intuition, mathematics, implementation, evaluation, assumptions, diagnostics, and the full practical ML workflow — built for projects, interviews, and real data analysis.</p>
+    <div class="metarow">
+      <span class="pill">33 Chapters</span>
+      <span class="pill">Worked Examples</span>
+      <span class="pill">Interactive Visualizations</span>
+      <span class="pill">Interview Question Bank</span>
+      <span class="pill">Glossary + Cheat Sheet</span>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 0 ================= -->
+  <section class="chapter" id="ch0">
+    <span class="chnum">CHAPTER 0</span>
+    <h2>How to Use This Course</h2>
+    <p class="deck">A short orientation before you begin — what you'll know by the end, and how to move through the material without getting stuck memorizing formulas.</p>
+
+    <p>Linear Regression is usually the very first machine learning algorithm anyone learns — and also the one people understand most shallowly, because it looks deceptively simple. This course is built to close that gap. By the end, you will be able to explain <em>why</em> the line sits where it sits, not just how to call <code>.fit()</code>.</p>
+
+    <h3>What you will know by the end</h3>
+    <p>You'll move through five layers for every idea: intuition, a tiny numeric example, the formula, a deeper explanation, and how it's actually used in a real ML project. By Chapter 32 you should be able to derive a regression line by hand, read a residual plot, explain assumption violations, and answer interview questions at beginner through advanced level.</p>
+
+    <h3>Recommended learning sequence</h3>
+    <p>Read chapters in order the first time — later chapters lean on earlier vocabulary (residual, SSE, OLS) constantly. Do the worked examples with pen and paper before checking the answer. Use the interactive visualizations to build intuition, not to skip the math.</p>
+
+    <div class="box dontmemorize">
+      <span class="tagline">Understanding vs. Memorizing</span>
+      <h4>These are not the same skill</h4>
+      <p>Memorizing <code>b₁ = Σ(x−x̄)(y−ȳ) / Σ(x−x̄)²</code> lets you pass a quiz. Understanding <em>why</em> that ratio produces the slope that minimizes squared error lets you reason about a model that's behaving strangely at 2am before a deadline. This course is built for the second kind of knowledge.</p>
+    </div>
+
+    <div class="box remember">
+      <span class="tagline">If you remember only 5 things…</span>
+      <ol class="five-things">
+        <li>Linear Regression finds the single line that minimizes total <strong>squared</strong> residual error — that's what "best fit" means.</li>
+        <li>A residual is <code>Actual − Predicted</code>. Everything (SSE, MSE, RMSE, R²) is built out of residuals.</li>
+        <li>R² compares your model to the simplest possible baseline: always predicting the mean.</li>
+        <li>Linear Regression assumes a roughly linear relationship, independent errors, constant error spread, and (for multiple features) low redundancy between predictors.</li>
+        <li>A single accuracy number can hide a badly-behaved model — always look at the residual plot.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 1 ================= -->
+  <section class="chapter" id="ch1">
+    <span class="chnum">CHAPTER 1</span>
+    <h2>The Big Picture <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">What problem is Linear Regression actually solving, in plain language, before a single formula appears?</p>
+
+    <h3>What problem are we solving?</h3>
+    <p>Imagine you have this tiny dataset:</p>
+    <table>
+      <tr><th>Hours Studied</th><th>Exam Score</th></tr>
+      <tr><td>1</td><td>45</td></tr>
+      <tr><td>2</td><td>50</td></tr>
+      <tr><td>3</td><td>55</td></tr>
+      <tr><td>4</td><td>65</td></tr>
+      <tr><td>5</td><td>70</td></tr>
+    </table>
+    <div class="box why">
+      <span class="tagline">The question</span>
+      <p>Can we use the number of hours studied to <strong>predict</strong> exam score — even for a student whose hours we've never seen before, like 3.5 hours?</p>
+    </div>
+    <p>Notice the pattern: as hours go up, score tends to go up too, in a roughly steady way. Linear Regression is the tool for turning "roughly steady pattern" into a precise mathematical line you can use for prediction.</p>
+
+    <div class="card">
+      <strong>Input X → Model → Prediction ŷ</strong>
+      <p style="margin-bottom:0">You feed in an input (hours studied), the model applies a learned rule, and it outputs a prediction (the little hat over ŷ signals "this is a prediction, not an observed fact").</p>
+    </div>
+
+    <h3>Vocabulary you'll use constantly</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Feature</td><td>An input variable used to make the prediction (e.g. hours studied)</td></tr>
+      <tr><td>Target</td><td>The value you're trying to predict (e.g. exam score)</td></tr>
+      <tr><td>Observation</td><td>One row of data — one student, one house, one transaction</td></tr>
+      <tr><td>Prediction (ŷ)</td><td>What the model outputs for a given input</td></tr>
+      <tr><td>Model</td><td>The learned rule that maps features to a prediction</td></tr>
+    </table>
+
+    <h3>Regression vs. Classification</h3>
+    <p>Regression predicts a <strong>continuous number</strong>. Classification predicts a <strong>category</strong>.</p>
+    <div class="grid2">
+      <div class="card"><strong>Regression examples</strong><ul><li>House price</li><li>Salary</li><li>Sales next month</li><li>Temperature tomorrow</li></ul></div>
+      <div class="card"><strong>Classification examples</strong><ul><li>Spam vs. not spam</li><li>Churn vs. not churn</li><li>Fraud vs. not fraud</li></ul></div>
+    </div>
+
+    <div class="box remember">
+      <span class="tagline">Remember this</span>
+      <p>If the answer to "what am I predicting?" is a number that could take any value on a continuum (₹52,340, 71.2°F, 3.8 kg), you're doing regression. If it's a label from a fixed set of categories, you're doing classification.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#cover">← Cover</a><a href="#ch2">Next: What Does "Linear" Mean? →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 2 ================= -->
+  <section class="chapter" id="ch2">
+    <span class="chnum">CHAPTER 2</span>
+    <h2>What Does "Linear" Mean? <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Before the algorithm, the shape: what a straight-line relationship looks like, and what it doesn't.</p>
+
+    <div class="box formula">
+      <span class="tagline">The simplest form</span>
+      <div class="f">y = b₀ + b₁x</div>
+      <p style="margin-bottom:0"><code>x</code> is the input, <code>y</code> is the output, <code>b₀</code> is the <strong>intercept</strong> (where the line crosses the y-axis, when x = 0), and <code>b₁</code> is the <strong>slope</strong> (how steeply y changes as x increases).</p>
+    </div>
+
+    <p>"Linear" simply means: as x increases by a fixed amount, y changes by a roughly <em>constant</em> amount, every time — not more at first and less later, not curving. That's the geometric picture of a straight line.</p>
+
+    <div class="widget" id="slopeInterceptWidget">
+      <strong>Interactive — Slope &amp; Intercept</strong>
+      <div class="controls">
+        <label>Intercept b₀ <input type="range" id="siB0" min="-4" max="10" step="0.5" value="2"></label>
+        <label>Slope b₁ <input type="range" id="siB1" min="-3" max="3" step="0.1" value="1.2"></label>
+      </div>
+      <svg id="siSvg" viewBox="0 0 600 320"></svg>
+      <div class="readout" id="siReadout"></div>
+      <div class="wcaption">Drag the sliders. Notice: b₀ only ever moves where the line crosses the y-axis; b₁ changes the steepness (and its sign flips the tilt).</div>
+    </div>
+
+    <h3>Positive, negative, and (approximately) no relationship</h3>
+    <div class="grid3">
+      <div class="mini"><svg viewBox="0 0 180 120"><line x1="15" y1="105" x2="165" y2="15" stroke="#17A398" stroke-width="3"/><circle cx="30" cy="98" r="3" fill="#23222A"/><circle cx="60" cy="80" r="3" fill="#23222A"/><circle cx="90" cy="60" r="3" fill="#23222A"/><circle cx="120" cy="40" r="3" fill="#23222A"/><circle cx="150" cy="22" r="3" fill="#23222A"/></svg><p>Positive slope: y rises as x rises</p></div>
+      <div class="mini"><svg viewBox="0 0 180 120"><line x1="15" y1="15" x2="165" y2="105" stroke="#E8558F" stroke-width="3"/><circle cx="30" cy="20" r="3" fill="#23222A"/><circle cx="60" cy="40" r="3" fill="#23222A"/><circle cx="90" cy="60" r="3" fill="#23222A"/><circle cx="120" cy="80" r="3" fill="#23222A"/><circle cx="150" cy="98" r="3" fill="#23222A"/></svg><p>Negative slope: y falls as x rises</p></div>
+      <div class="mini"><svg viewBox="0 0 180 120"><line x1="15" y1="60" x2="165" y2="60" stroke="#6C4AB6" stroke-width="3"/><circle cx="30" cy="30" r="3" fill="#23222A"/><circle cx="60" cy="90" r="3" fill="#23222A"/><circle cx="90" cy="35" r="3" fill="#23222A"/><circle cx="120" cy="85" r="3" fill="#23222A"/><circle cx="150" cy="45" r="3" fill="#23222A"/></svg><p>Near-zero slope: little linear relationship</p></div>
+    </div>
+
+    <div class="box mistake">
+      <span class="tagline">Common mistake</span>
+      <p>Assuming that because two variables aren't linearly related, they aren't related <em>at all</em>. A U-shaped or cyclical relationship can be strong while its linear correlation is near zero (Chapter 22 covers how to still use linear regression on curved data).</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch1">← The Big Picture</a><a href="#ch3">Next: Slope and Intercept →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 3 ================= -->
+  <section class="chapter" id="ch3">
+    <span class="chnum">CHAPTER 3</span>
+    <h2>Understanding Slope and Intercept <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Turning the abstract b₀ and b₁ into something you can say out loud in a meeting.</p>
+
+    <div class="box example">
+      <span class="tagline">Worked example</span>
+      <div class="f" style="font-size:19px;">Salary = 20,000 + 5,000 × Years of Experience</div>
+      <p>Intercept = 20,000. Slope = 5,000.</p>
+    </div>
+
+    <div class="box why">
+      <span class="tagline">How to say it in a sentence</span>
+      <p>"For every additional year of experience, predicted salary increases by approximately ₹5,000, according to this model." Notice the careful phrasing — <strong>according to this model</strong>, not "experience causes higher salary." Association is not causation: confounding factors (seniority, company size, negotiation skill) could be driving both.</p>
+    </div>
+
+    <h3>Positive, negative, and zero slope — interpreted</h3>
+    <table>
+      <tr><th>Slope</th><th>Interpretation</th></tr>
+      <tr><td>Positive (e.g. +5,000)</td><td>Outcome increases as the feature increases</td></tr>
+      <tr><td>Negative (e.g. −1,200)</td><td>Outcome decreases as the feature increases</td></tr>
+      <tr><td>Near zero</td><td>This feature has little linear predictive effect on the outcome, holding the model as-is</td></tr>
+    </table>
+
+    <div class="box mistake">
+      <span class="tagline">Why the intercept can be practically meaningless</span>
+      <p>The intercept is the predicted value when every feature equals zero. For a house-price model, that would mean "a house with 0 square feet" — mathematically necessary for the line to exist, but not a real scenario. The intercept is often a mathematical anchor, not a real-world data point.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch2">← What Does "Linear" Mean?</a><a href="#ch4">Next: Finding the Best Line →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 4 ================= -->
+  <section class="chapter" id="ch4">
+    <span class="chnum">CHAPTER 4</span>
+    <h2>How Does the Model Find the "Best" Line? <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">The single most important idea in this entire course.</p>
+
+    <div class="box why">
+      <span class="tagline">The core problem</span>
+      <p>There are infinitely many possible lines you could draw through a scatter of points. Which one is "best," and what does "best" even mean mathematically?</p>
+    </div>
+
+    <h3>Predicted value, actual value, error, residual</h3>
+    <div class="box definition">
+      <span class="tagline">Definition</span>
+      <div class="f" style="font-size:19px;">Residual = Actual − Predicted</div>
+      <p style="margin-bottom:0">A residual is the vertical gap between a real data point and where the line said it should be. A point above the line has a positive residual; a point below has a negative one.</p>
+    </div>
+
+    <div class="widget" id="playgroundWidget">
+      <strong>Interactive Regression Playground</strong>
+      <div class="controls">
+        <button id="pgToggleResid">Show residuals</button>
+        <button id="pgToggleSq">Show squared residuals</button>
+        <button id="pgReset">Reset points</button>
+      </div>
+      <svg id="pgSvg" viewBox="0 0 600 340"></svg>
+      <div class="readout" id="pgReadout"></div>
+      <div class="wcaption">Drag any point (Advertising Spend vs. Sales, from Chapter 7's dataset). The best-fit (OLS) line recalculates live, and SSE updates below.</div>
+    </div>
+
+    <h3>Why we don't simply add up raw errors</h3>
+    <div class="box example">
+      <span class="tagline">Tiny example</span>
+      <p>Actual = 10, Predicted = 8 → Error = 2<br>Actual = 5, Predicted = 7 → Error = −2</p>
+      <div class="f" style="font-size:19px;">2 + (−2) = 0</div>
+      <p style="margin-bottom:0">The total looks like a perfect model — zero total error — even though <em>both</em> predictions were wrong. Positive and negative errors cancel out and hide real mistakes.</p>
+    </div>
+
+    <div class="box why">
+      <span class="tagline">Why squaring fixes this</span>
+      <p>Squaring makes every error non-negative, so errors can no longer cancel: (2)² = 4 and (−2)² = 4, giving a total of 8 — which honestly reflects that both predictions missed. Squaring also penalizes large errors disproportionately more than small ones, which turns out to have very convenient mathematical properties (Chapter 5).</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch3">← Slope and Intercept</a><a href="#ch5">Next: Least Squares →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 5 ================= -->
+  <section class="chapter" id="ch5">
+    <span class="chnum">CHAPTER 5</span>
+    <h2>Least Squares <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">The formal rule that picks exactly one line out of the infinite candidates.</p>
+
+    <div class="box definition">
+      <span class="tagline">Ordinary Least Squares (OLS)</span>
+      <p style="margin-bottom:0">Choose the line that minimizes the total squared residual error across every data point in the training set.</p>
+    </div>
+
+    <div class="box formula">
+      <span class="tagline">Formula</span>
+      <div class="f">SSE = Σ(yᵢ − ŷᵢ)²</div>
+      <p style="margin-bottom:0"><code>yᵢ</code> is the actual value of observation i, <code>ŷᵢ</code> is the model's prediction for observation i, the subtraction gives the residual, squaring removes cancellation, and Σ (sigma) sums this over every observation.</p>
+    </div>
+
+    <h3>A complete tiny numerical example</h3>
+    <p>Suppose a candidate line predicts: for x = [1,2,3], ŷ = [2, 4, 6]; actual y = [3, 3, 7].</p>
+    <table>
+      <tr><th>x</th><th>Actual y</th><th>Predicted ŷ</th><th>Residual</th><th>Squared residual</th></tr>
+      <tr><td>1</td><td>3</td><td>2</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>3</td><td>4</td><td>−1</td><td>1</td></tr>
+      <tr><td>3</td><td>7</td><td>6</td><td>1</td><td>1</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>SSE</strong></td><td><strong>3</strong></td></tr>
+    </table>
+
+    <p>Now compare a second candidate line, ŷ = [3, 4, 5]:</p>
+    <table>
+      <tr><th>x</th><th>Actual y</th><th>Predicted ŷ</th><th>Residual</th><th>Squared residual</th></tr>
+      <tr><td>1</td><td>3</td><td>3</td><td>0</td><td>0</td></tr>
+      <tr><td>2</td><td>3</td><td>4</td><td>−1</td><td>1</td></tr>
+      <tr><td>3</td><td>7</td><td>5</td><td>2</td><td>4</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>SSE</strong></td><td><strong>5</strong></td></tr>
+    </table>
+
+    <div class="box remember">
+      <span class="tagline">Remember this</span>
+      <p>The first candidate line (SSE = 3) fits better than the second (SSE = 5) — even though the second line predicts one point <em>exactly</em>. OLS cares about the total, not any single point.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch4">← Finding the Best Line</a><a href="#ch6">Next: The Mathematics →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 6 ================= -->
+  <section class="chapter" id="ch6">
+    <span class="chnum">CHAPTER 6</span>
+    <h2>The Mathematics Behind the Line <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Deriving b₀ and b₁ by hand — the formula stops being magic once you calculate it once.</p>
+
+    <div class="box formula">
+      <span class="tagline">Simple linear regression formulas</span>
+      <div class="f">b₁ = Σ[(xᵢ − x̄)(yᵢ − ȳ)] / Σ[(xᵢ − x̄)²]</div>
+      <div class="f">b₀ = ȳ − b₁x̄</div>
+    </div>
+
+    <p><code>x̄</code> ("x-bar") is the mean of x; <code>ȳ</code> is the mean of y. <code>(xᵢ − x̄)</code> is how far a single x-value deviates from the average x. The numerator measures how x and y move <em>together</em> (their covariance); the denominator measures how much x varies on its own. The ratio is, intuitively, "how much does y move per unit that x moves," which is exactly what a slope means.</p>
+
+    <h3>Manual walkthrough with a tiny dataset</h3>
+    <p>Data: x = [1, 2, 3], y = [2, 4, 5]. Mean of x = 2, mean of y = 3.667.</p>
+    <table>
+      <tr><th>x</th><th>y</th><th>x − x̄</th><th>y − ȳ</th><th>(x−x̄)(y−ȳ)</th><th>(x−x̄)²</th></tr>
+      <tr><td>1</td><td>2</td><td>−1</td><td>−1.667</td><td>1.667</td><td>1</td></tr>
+      <tr><td>2</td><td>4</td><td>0</td><td>0.333</td><td>0</td><td>0</td></tr>
+      <tr><td>3</td><td>5</td><td>1</td><td>1.333</td><td>1.333</td><td>1</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>Sum</strong></td><td><strong>3.0</strong></td><td><strong>2.0</strong></td></tr>
+    </table>
+    <p>b₁ = 3.0 / 2.0 = <strong>1.5</strong>. b₀ = 3.667 − (1.5 × 2) = <strong>0.667</strong>. Final equation: <code>ŷ = 0.667 + 1.5x</code>.</p>
+
+    <div class="box interview">
+      <span class="tagline">Interview tip</span>
+      <p>If asked "why does this formula produce the minimum-SSE line," the honest short answer is: it's the result of taking the derivative of the SSE function with respect to b₀ and b₁, setting both to zero, and solving the resulting two equations. You don't need to reproduce that derivation from scratch in most interviews — but say this out loud instead of pretending the formula fell from the sky.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch5">← Least Squares</a><a href="#ch7">Next: Full Worked Example →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 7 ================= -->
+  <section class="chapter" id="ch7">
+    <span class="chnum">CHAPTER 7</span>
+    <h2>A Full Worked Example <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Start to finish, by hand: Advertising Spend predicting Sales.</p>
+
+    <table>
+      <tr><th>Advertising Spend</th><th>Sales</th></tr>
+      <tr><td>1</td><td>2</td></tr><tr><td>2</td><td>4</td></tr><tr><td>3</td><td>5</td></tr><tr><td>4</td><td>7</td></tr><tr><td>5</td><td>8</td></tr>
+    </table>
+
+    <p><strong>Step 1–2:</strong> x̄ = 3, ȳ = 5.2</p>
+    <table>
+      <tr><th>x</th><th>y</th><th>x−x̄</th><th>y−ȳ</th><th>Product</th><th>(x−x̄)²</th></tr>
+      <tr><td>1</td><td>2</td><td>−2</td><td>−3.2</td><td>6.4</td><td>4</td></tr>
+      <tr><td>2</td><td>4</td><td>−1</td><td>−1.2</td><td>1.2</td><td>1</td></tr>
+      <tr><td>3</td><td>5</td><td>0</td><td>−0.2</td><td>0.0</td><td>0</td></tr>
+      <tr><td>4</td><td>7</td><td>1</td><td>1.8</td><td>1.8</td><td>1</td></tr>
+      <tr><td>5</td><td>8</td><td>2</td><td>2.8</td><td>5.6</td><td>4</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>Sum</strong></td><td><strong>15.0</strong></td><td><strong>10</strong></td></tr>
+    </table>
+    <p><strong>Steps 6–8:</strong> b₁ = 15/10 = <strong>1.5</strong>. b₀ = 5.2 − 1.5×3 = <strong>0.7</strong>. Regression equation: <code>ŷ = 0.7 + 1.5x</code>.</p>
+
+    <p><strong>Step 9 — a prediction:</strong> at spend = 6, ŷ = 0.7 + 1.5×6 = <strong>9.7</strong>.</p>
+
+    <p><strong>Steps 10–11 — residuals and SSE:</strong></p>
+    <table>
+      <tr><th>x</th><th>Actual y</th><th>ŷ</th><th>Residual</th><th>Squared</th></tr>
+      <tr><td>1</td><td>2</td><td>2.2</td><td>−0.2</td><td>0.04</td></tr>
+      <tr><td>2</td><td>4</td><td>3.7</td><td>0.3</td><td>0.09</td></tr>
+      <tr><td>3</td><td>5</td><td>5.2</td><td>−0.2</td><td>0.04</td></tr>
+      <tr><td>4</td><td>7</td><td>6.7</td><td>0.3</td><td>0.09</td></tr>
+      <tr><td>5</td><td>8</td><td>8.2</td><td>−0.2</td><td>0.04</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>SSE</strong></td><td><strong>0.30</strong></td></tr>
+    </table>
+
+    <div class="box remember"><span class="tagline">Remember this</span><p>This exact dataset drives the interactive playground in Chapter 4 — go drag those points and watch these same numbers change live.</p></div>
+
+    <div class="navbtnrow"><a href="#ch6">← The Mathematics</a><a href="#ch8">Next: Geometric Intuition →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 8 ================= -->
+  <section class="chapter" id="ch8">
+    <span class="chnum">CHAPTER 8</span>
+    <h2>Geometric Intuition <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Zooming back out to the picture, now that the numbers behind it are no longer mysterious.</p>
+
+    <div class="card">
+      <strong>Data points → Candidate line → Residuals → Total squared error → Best-fitting line</strong>
+      <p style="margin-bottom:0">Every candidate line produces its own set of residuals and its own SSE. OLS is the search over all possible lines for the one specific line with the smallest possible SSE.</p>
+    </div>
+
+    <div class="box why">
+      <span class="tagline">Why the line doesn't hit every point</span>
+      <p>Regression finds the line that provides the best <em>overall</em> fit according to the chosen loss function (squared error) — not a line forced through every point. Forcing the line through every point (like connecting dots) would overfit to noise and generalize terribly to new data.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch7">← Full Worked Example</a><a href="#ch9">Next: Optimization Intuition →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 9 ================= -->
+  <section class="chapter" id="ch9">
+    <span class="chnum">CHAPTER 9</span>
+    <h2>Optimization Intuition <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Reframing the same problem as "minimize a cost function" — the language that unlocks gradient descent, neural networks, and beyond.</p>
+
+    <div class="box formula">
+      <span class="tagline">Cost / Loss Function</span>
+      <div class="f">MSE = (1/n) Σ(yᵢ − ŷᵢ)²</div>
+      <p style="margin-bottom:0">MSE is just SSE divided by the number of observations — the <em>average</em> squared error instead of the total.</p>
+    </div>
+
+    <table>
+      <tr><th>Metric</th><th>What it is</th></tr>
+      <tr><td>SSE</td><td>Total squared error (sensitive to how much data you have)</td></tr>
+      <tr><td>MSE</td><td>Average squared error (comparable across dataset sizes)</td></tr>
+      <tr><td>RMSE</td><td>Square root of MSE (back in the original units of y)</td></tr>
+    </table>
+
+    <h3>Gradient Descent — the visual version first</h3>
+    <div class="card">
+      <strong>Mountain / bowl-shaped cost surface → Start somewhere → Calculate direction of steepest descent → Take a step → Repeat → Reach minimum</strong>
+    </div>
+
+    <div class="widget" id="gdWidget">
+      <strong>Interactive — Gradient Descent</strong>
+      <div class="controls">
+        <label>Learning rate <input type="range" id="gdLr" min="0.02" max="0.9" step="0.02" value="0.15"></label>
+        <button id="gdStep">Take one step</button>
+        <button id="gdRun">Run to convergence</button>
+        <button id="gdReset">Reset ball</button>
+      </div>
+      <svg id="gdSvg" viewBox="0 0 600 260"></svg>
+      <div class="readout" id="gdReadout"></div>
+      <div class="wcaption">The curve is a simplified cost surface. A tiny learning rate converges slowly; too large a learning rate can overshoot and bounce.</div>
+    </div>
+
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Learning rate</td><td>How big a step is taken at each iteration</td></tr>
+      <tr><td>Gradient</td><td>The direction (and steepness) of the slope at the current point</td></tr>
+      <tr><td>Iteration</td><td>One step of "measure gradient, move, repeat"</td></tr>
+      <tr><td>Local minimum</td><td>A low point the algorithm might settle at — for plain linear regression's bowl-shaped cost surface, there's only one minimum, so this isn't a concern here</td></tr>
+      <tr><td>Convergence</td><td>The point where further steps barely change the cost — the algorithm has effectively arrived</td></tr>
+    </table>
+
+    <h3>OLS vs. Gradient Descent</h3>
+    <table>
+      <tr><th>OLS</th><th>Gradient Descent</th></tr>
+      <tr><td>Analytical, closed-form solution</td><td>Iterative optimization</td></tr>
+      <tr><td>Very efficient for small/medium feature sets</td><td>Useful for large-scale problems (millions of rows/features)</td></tr>
+      <tr><td>Directly calculates coefficients</td><td>Updates coefficients repeatedly until convergence</td></tr>
+    </table>
+    <p>In practice, <code>scikit-learn</code>'s <code>LinearRegression</code> commonly uses least-squares solvers rather than requiring you to manually implement gradient descent — but understanding gradient descent matters because it generalizes to models where no closed-form solution exists (like most of deep learning).</p>
+
+    <div class="navbtnrow"><a href="#ch8">← Geometric Intuition</a><a href="#ch10">Next: Multiple Linear Regression →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 10 ================= -->
+  <section class="chapter" id="ch10">
+    <span class="chnum">CHAPTER 10</span>
+    <h2>Multiple Linear Regression <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Moving from one feature to many — the same idea, more dimensions.</p>
+
+    <div class="box formula">
+      <span class="tagline">From one feature to many</span>
+      <div class="f">ŷ = b₀ + b₁x₁ + b₂x₂ + … + bₚxₚ</div>
+    </div>
+
+    <div class="box example">
+      <span class="tagline">Worked interpretation</span>
+      <p>House Price = Base Price + (area contribution) + (bedroom contribution) + (location contribution)</p>
+      <p style="margin-bottom:0">If the coefficient on "extra bedroom" is +₹3,50,000, that means: <strong>holding area, age, and location constant</strong>, one additional bedroom is associated with a ₹3,50,000 higher predicted price.</p>
+    </div>
+
+    <div class="box why">
+      <span class="tagline">Why "holding other variables constant" matters so much</span>
+      <p>Without this phrase, coefficients are easy to misread. A bedroom coefficient doesn't mean "any house with one more bedroom is worth ₹3,50,000 more" in general — bigger houses tend to have more bedrooms <em>and</em> more area, so without controlling for area, you'd be partly measuring the effect of size, not bedrooms.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch9">← Optimization Intuition</a><a href="#ch11">Next: Matrix Form →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 11 ================= -->
+  <section class="chapter" id="ch11">
+    <span class="chnum">CHAPTER 11</span>
+    <h2>Matrix Form <span class="diff adv">🔴 Advanced</span></h2>
+    <p class="deck">The compact notation used in papers, libraries, and derivations — explained without assuming you know linear algebra.</p>
+
+    <div class="box formula">
+      <span class="tagline">Matrix representation</span>
+      <div class="f">ŷ = Xβ</div>
+      <p style="margin-bottom:0"><code>X</code> is a table of all feature values (rows = observations, columns = features, plus a column of 1s for the intercept). <code>β</code> is the column of coefficients (b₀, b₁, b₂, …). Multiplying them produces the vector of predictions <code>ŷ</code> in one shot, for every row at once.</p>
+    </div>
+
+    <div class="box formula">
+      <span class="tagline">The Normal Equation</span>
+      <div class="f">β = (XᵀX)⁻¹Xᵀy</div>
+      <p style="margin-bottom:0">At a high level: this equation directly solves for the coefficients that minimize SSE, in one closed-form calculation, without any iteration. <code>Xᵀ</code> is the transpose of X; the inverse "undoes" a matrix multiplication, similar to how division undoes multiplication for ordinary numbers.</p>
+    </div>
+
+    <div class="box interview">
+      <span class="tagline">Do I need to calculate this manually in real ML projects?</span>
+      <p style="margin-bottom:0">Usually no — <code>scikit-learn</code> and every serious library handle this internally. But understanding what the equation is <em>doing</em> (finding the coefficients that minimize squared error, directly) helps you reason about failure modes like a singular <code>XᵀX</code> matrix (see multicollinearity, Chapter 18).</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch10">← Multiple Linear Regression</a><a href="#ch12">Next: Train/Test Split →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 12 ================= -->
+  <section class="chapter" id="ch12">
+    <span class="chnum">CHAPTER 12</span>
+    <h2>Train/Test Split <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Why evaluating a model on the data it trained on is a trap.</p>
+
+    <div class="box mistake">
+      <span class="tagline">Common mistake</span>
+      <p>A model can memorize quirks of the exact data it saw and score deceptively well on that same data, while performing much worse on new, unseen data. That gap is exactly what train/test splitting is designed to expose.</p>
+    </div>
+
+    <div class="widget" id="ttWidget">
+      <strong>Interactive — Train / Test Split</strong>
+      <div class="controls">
+        <label>Test size <input type="range" id="ttSplit" min="10" max="50" step="5" value="20">%</label>
+      </div>
+      <svg id="ttSvg" viewBox="0 0 600 140"></svg>
+      <div class="readout" id="ttReadout"></div>
+      <div class="wcaption">Purple dots train the model; teal dots are held back purely to check how well it generalizes.</div>
+    </div>
+
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Training set</td><td>Data used to fit the model's coefficients</td></tr>
+      <tr><td>Test set</td><td>Data held back, used only at the end to evaluate performance</td></tr>
+      <tr><td>Validation set</td><td>An optional third split used for tuning decisions (e.g. choosing regularization strength) before the final test-set evaluation</td></tr>
+    </table>
+
+    <div class="box why">
+      <span class="tagline">What is data leakage?</span>
+      <p>Data leakage happens when information from the test set (directly or indirectly) influences training — for example, scaling the entire dataset before splitting it, so statistics from the test set leak into the training process. The model then looks better than it really is.</p>
+    </div>
+
+    <p>An 80/20 split is common, but there's no universal magic ratio — smaller datasets sometimes need a larger test share to get a stable estimate; huge datasets can afford a small test percentage while still holding back plenty of rows.</p>
+
+    <div class="navbtnrow"><a href="#ch11">← Matrix Form</a><a href="#ch13">Next: Model Evaluation →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 13 ================= -->
+  <section class="chapter" id="ch13">
+    <span class="chnum">CHAPTER 13</span>
+    <h2>Model Evaluation <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Three closely related metrics that get confused constantly — and when to reach for each.</p>
+
+    <div class="box formula"><span class="tagline">MAE</span><div class="f">MAE = (1/n)Σ|yᵢ − ŷᵢ|</div><p style="margin-bottom:0">The average absolute size of the error, in the original units of y. Easy to explain to a non-technical stakeholder.</p></div>
+    <div class="box formula"><span class="tagline">MSE</span><div class="f">MSE = (1/n)Σ(yᵢ − ŷᵢ)²</div><p style="margin-bottom:0">Same idea as MAE, but squared — so large errors count disproportionately more.</p></div>
+    <div class="box formula"><span class="tagline">RMSE</span><div class="f">RMSE = √MSE</div><p style="margin-bottom:0">Takes MSE back into the original units of y, while still punishing large errors more heavily than MAE does.</p></div>
+
+    <table>
+      <tr><th>Metric</th><th>Easy to interpret?</th><th>Penalizes large errors?</th><th>Units</th></tr>
+      <tr><td>MAE</td><td>Yes</td><td>Less</td><td>Same as target</td></tr>
+      <tr><td>MSE</td><td>No</td><td>Strongly</td><td>Squared</td></tr>
+      <tr><td>RMSE</td><td>Yes</td><td>Strongly</td><td>Same as target</td></tr>
+    </table>
+
+    <div class="box interview">
+      <span class="tagline">Interview tip</span>
+      <p>"Why use RMSE instead of MAE?" — a strong answer: RMSE is more sensitive to large, costly mistakes (useful when big errors are especially bad, like structural engineering estimates), while MAE treats every unit of error the same (useful when you want a metric that isn't dominated by a few outliers).</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch12">← Train/Test Split</a><a href="#ch14">Next: R² Score →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 14 ================= -->
+  <section class="chapter" id="ch14">
+    <span class="chnum">CHAPTER 14</span>
+    <h2>R² Score <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">The most quoted, most misunderstood metric in regression.</p>
+
+    <div class="box formula">
+      <span class="tagline">Formula</span>
+      <div class="f">R² = 1 − SSE/SST</div>
+      <p style="margin-bottom:0"><code>SSE</code> is your model's total squared error. <code>SST</code> ("total sum of squares") is the total squared error you'd get from the dumbest possible baseline model: always predicting the mean of y. R² asks: <em>how much better is my model than just guessing the average, every time?</em></p>
+    </div>
+
+    <div class="widget" id="r2Widget">
+      <strong>Interactive — R² Intuition</strong>
+      <div class="controls">
+        <button id="r2ToggleMean" class="active">Show mean baseline (SST)</button>
+        <button id="r2ToggleModel" class="active">Show regression fit (SSE)</button>
+      </div>
+      <svg id="r2Svg" viewBox="0 0 600 300"></svg>
+      <div class="readout" id="r2Readout"></div>
+      <div class="wcaption">Grey bars show error against the flat mean-prediction line; purple bars show error against the fitted regression line. R² is how much smaller the purple total is.</div>
+    </div>
+
+    <table>
+      <tr><th>Value</th><th>Meaning</th></tr>
+      <tr><td>R² = 1</td><td>Perfect fit — SSE is zero</td></tr>
+      <tr><td>R² = 0</td><td>Your model is exactly as good as always predicting the mean</td></tr>
+      <tr><td>R² &lt; 0</td><td>Your model is <em>worse</em> than just predicting the mean — it's actively making things worse (common with a badly misspecified model, or when evaluated on very different test data)</td></tr>
+    </table>
+
+    <div class="box mistake">
+      <span class="tagline">The false rule to unlearn</span>
+      <p>"Higher R² always means a better model" is false. R² mechanically increases (or at worst stays flat) every time you add <em>any</em> feature to a model, even a useless random one — which is why adjusted R² and out-of-sample performance matter more than raw R² alone.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch13">← Model Evaluation</a><a href="#ch15">Next: Correlation vs Regression →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 15 ================= -->
+  <section class="chapter" id="ch15">
+    <span class="chnum">CHAPTER 15</span>
+    <h2>Correlation vs. Regression <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Two closely related ideas that answer different questions.</p>
+
+    <table>
+      <tr><th>Correlation</th><th>Regression</th></tr>
+      <tr><td>Symmetric: correlation of X with Y equals correlation of Y with X</td><td>Directional: defines predictor → target explicitly</td></tr>
+      <tr><td>A single number from −1 to 1 describing strength/direction of a linear relationship</td><td>A full equation that produces a prediction for any input</td></tr>
+    </table>
+
+    <div class="box why">
+      <span class="tagline">Why strong correlation doesn't prove causation</span>
+      <p>Ice cream sales and drowning incidents are strongly correlated — because both rise in summer heat, not because either causes the other. A third variable (temperature) drives both. Regression can quantify the association precisely without ever establishing that one variable causes the other; that requires experimental design or causal inference methods beyond this course.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch14">← R² Score</a><a href="#ch16">Next: Assumptions →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 16 ================= -->
+  <section class="chapter" id="ch16">
+    <span class="chnum">CHAPTER 16</span>
+    <h2>Assumptions of Linear Regression <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Five conditions the model quietly assumes are true — and what happens when they aren't.</p>
+
+    <h3>1. Linearity</h3>
+    <p><strong>What it means:</strong> the true relationship between features and target is approximately a straight line (or plane, with multiple features).<br>
+    <strong>Why it matters:</strong> if the real relationship curves, a straight line systematically mis-predicts in certain ranges.<br>
+    <strong>How to detect it:</strong> plot residuals against predicted values — a clear curve pattern signals non-linearity.<br>
+    <strong>What it looks like:</strong> a residual plot with a visible U-shape or arc instead of random scatter.<br>
+    <strong>What to do:</strong> add polynomial terms (Chapter 22), transform a feature (e.g. log), or use a non-linear model.</p>
+
+    <h3>2. Independence</h3>
+    <p><strong>What it means:</strong> one observation's error shouldn't predict another's — no hidden ordering or repetition effect.<br>
+    <strong>Why it matters:</strong> violated independence (common in time series) makes standard errors and significance tests unreliable, even if predictions still look fine.<br>
+    <strong>How to detect it:</strong> plot residuals in the order they occurred; look for runs or cycles.<br>
+    <strong>What it looks like:</strong> residuals that snake up and down together in sequence, rather than jumping randomly.<br>
+    <strong>What to do:</strong> use models designed for sequential data, or add lag features.</p>
+
+    <h3>3. Homoscedasticity</h3>
+    <p><strong>What it means:</strong> the spread of residuals stays roughly constant across all predicted values.<br>
+    <strong>Why it matters:</strong> if error spread changes (heteroscedasticity), the model is more uncertain in some ranges than others, which standard error estimates don't account for.<br>
+    <strong>How to detect it:</strong> the residual-vs-predicted plot again — this time looking at spread, not shape.<br>
+    <strong>What it looks like:</strong> a funnel or cone shape, where residuals fan out as predictions grow.<br>
+    <strong>What to do:</strong> transform the target (e.g. log of y), or use weighted least squares.</p>
+
+    <h3>4. Normality of residuals</h3>
+    <p><strong>What it means:</strong> residuals are approximately normally distributed.<br>
+    <strong>Why it matters:</strong> mainly affects the validity of confidence intervals and hypothesis tests on coefficients — not the point predictions themselves.<br>
+    <strong>How to detect it:</strong> a histogram of residuals, or a Q-Q plot.<br>
+    <strong>What it looks like:</strong> a lopsided or heavy-tailed residual histogram instead of a roughly bell-shaped one.<br>
+    <strong>What to do:</strong> often tolerable in practice with enough data; consider transformations or robust methods if severe.</p>
+
+    <h3>5. No severe multicollinearity (multiple regression only)</h3>
+    <p><strong>What it means:</strong> predictor variables shouldn't be too strongly correlated with each other.<br>
+    <strong>Why it matters:</strong> makes individual coefficient estimates unstable and hard to interpret (Chapter 18 goes deep here).<br>
+    <strong>How to detect it:</strong> correlation matrix between features, or VIF.<br>
+    <strong>What it looks like:</strong> coefficients that swing wildly or flip sign when you add/remove a similar feature.<br>
+    <strong>What to do:</strong> remove or combine redundant features, or regularize.</p>
+
+    <div class="box dontmemorize"><span class="tagline">Don't memorize</span><p>Don't memorize assumptions as a list to recite. Understand what each one looks like in a residual plot — that's the version of this knowledge you'll actually use.</p></div>
+
+    <div class="navbtnrow"><a href="#ch15">← Correlation vs Regression</a><a href="#ch17">Next: Residual Analysis →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 17 ================= -->
+  <section class="chapter" id="ch17">
+    <span class="chnum">CHAPTER 17</span>
+    <h2>Residual Analysis <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">The single most under-used diagnostic tool in applied regression.</p>
+
+    <div class="box definition"><span class="tagline">Definition, again — worth repeating</span><div class="f">Residual = Actual − Predicted</div></div>
+
+    <h3>Residual vs. Predicted plot — reading the shapes</h3>
+    <div class="grid3" id="residPatternWidget">
+      <div class="mini"><svg viewBox="0 0 180 110" id="rpRandom"></svg><p><strong>Random scatter</strong><br>Healthy — no visible pattern</p></div>
+      <div class="mini"><svg viewBox="0 0 180 110" id="rpFunnel"></svg><p><strong>Funnel shape</strong><br>Heteroscedasticity</p></div>
+      <div class="mini"><svg viewBox="0 0 180 110" id="rpCurve"></svg><p><strong>Curve pattern</strong><br>Non-linearity missed</p></div>
+    </div>
+
+    <div class="box mistake"><span class="tagline">Common mistake</span><p>Looking only at R² or RMSE and skipping the residual plot entirely. A model can have a "good" overall RMSE while badly mispredicting an entire region of the data — the kind of systematic error a single number will never reveal, but a residual plot exposes instantly.</p></div>
+
+    <div class="navbtnrow"><a href="#ch16">← Assumptions</a><a href="#ch18">Next: Multicollinearity →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 18 ================= -->
+  <section class="chapter" id="ch18">
+    <span class="chnum">CHAPTER 18</span>
+    <h2>Multicollinearity <span class="diff adv">🔴 Advanced</span></h2>
+    <p class="deck">What happens when your predictors start predicting each other.</p>
+
+    <div class="box example">
+      <span class="tagline">Example</span>
+      <p style="margin-bottom:0">House size, number of rooms, and number of bedrooms are all highly correlated with each other — a bigger house tends to have more rooms <em>and</em> more bedrooms. Including all three makes it hard for the model to tell which one is "really" driving price.</p>
+    </div>
+
+    <div class="box why"><span class="tagline">Why this creates unstable coefficients</span><p style="margin-bottom:0">When two features carry almost the same information, the model can trade coefficient weight between them in many different ways and land on nearly the same predictions — so small changes in the data can swing individual coefficients dramatically, even flipping their sign, without changing overall accuracy.</p></div>
+
+    <div class="box definition">
+      <span class="tagline">VIF — Variance Inflation Factor</span>
+      <p style="margin-bottom:0">Conceptually, VIF measures how much a feature's variance is "inflated" because it can be predicted from the other features. A high VIF flags a feature that's largely redundant with the rest of the feature set. Don't over-focus on memorizing exact thresholds — the point is the direction and relative severity.</p>
+    </div>
+
+    <p>Common approaches once multicollinearity is detected: remove one of the redundant variables, combine them into a single composite feature, apply regularization (Chapter 23), or lean on domain knowledge to choose which variable is more meaningful to keep.</p>
+
+    <div class="navbtnrow"><a href="#ch17">← Residual Analysis</a><a href="#ch19">Next: Outliers &amp; Influence →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 19 ================= -->
+  <section class="chapter" id="ch19">
+    <span class="chnum">CHAPTER 19</span>
+    <h2>Outliers and Influential Points <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">One unusual point can move the entire model — see it happen below.</p>
+
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Outlier</td><td>A point far from the general trend of the data (in x, y, or both)</td></tr>
+      <tr><td>Leverage</td><td>How unusual a point's <em>feature</em> value is, independent of its target value</td></tr>
+      <tr><td>Influential observation</td><td>A point (often high-leverage) whose removal would noticeably change the fitted line</td></tr>
+    </table>
+
+    <div class="widget" id="outlierWidget">
+      <strong>Interactive — Outlier Influence</strong>
+      <div class="controls"><button id="outReset">Reset outlier position</button></div>
+      <svg id="outSvg" viewBox="0 0 600 320"></svg>
+      <div class="readout" id="outReadout"></div>
+      <div class="wcaption">Drag the highlighted pink point far from the rest of the cluster and watch the regression line tilt toward it.</div>
+    </div>
+
+    <div class="box why"><span class="tagline">Why Linear Regression is sensitive to outliers</span><p style="margin-bottom:0">Because errors are squared, a point that's far from the line contributes a disproportionately huge amount to SSE — so OLS will happily distort the whole line to shrink that one large squared term, even at the cost of fitting everything else slightly worse.</p></div>
+
+    <p>At a high level, robust alternatives exist (e.g. Huber loss, RANSAC, quantile regression) that reduce the influence of extreme points — worth knowing exist, even if plain OLS remains the default starting point.</p>
+
+    <div class="navbtnrow"><a href="#ch18">← Multicollinearity</a><a href="#ch20">Next: Feature Scaling →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 20 ================= -->
+  <section class="chapter" id="ch20">
+    <span class="chnum">CHAPTER 20</span>
+    <h2>Feature Scaling <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Does Linear Regression actually need it?</p>
+
+    <table>
+      <tr><th>Ordinary Linear Regression (OLS)</th><th>Gradient Descent / Regularized Regression</th></tr>
+      <tr><td>Scaling is not generally required for correct predictions — the closed-form solution handles different feature scales mathematically</td><td>Scaling matters a lot — features on very different scales can make gradient descent converge slowly, and regularization penalties are scale-sensitive</td></tr>
+    </table>
+
+    <div class="box example"><span class="tagline">Example</span><p style="margin-bottom:0">A house-price model with "area in square feet" (values in the thousands) and "number of bedrooms" (values 1–5) will still fit correctly with plain OLS. But feed those same unscaled features into Ridge or Lasso, and the penalty will unfairly shrink the bedroom coefficient much less than it should relative to area — so those methods typically standardize features first.</p></div>
+
+    <div class="navbtnrow"><a href="#ch19">← Outliers &amp; Influence</a><a href="#ch21">Next: Categorical Variables →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 21 ================= -->
+  <section class="chapter" id="ch21">
+    <span class="chnum">CHAPTER 21</span>
+    <h2>Categorical Variables <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Regression only understands numbers — here's how text categories become numeric inputs.</p>
+
+    <div class="box definition">
+      <span class="tagline">One-hot encoding</span>
+      <p style="margin-bottom:0">Each category becomes its own 0/1 column. For City ∈ {Mumbai, Delhi, Bangalore}, you'd get three columns: <code>is_Mumbai</code>, <code>is_Delhi</code>, <code>is_Bangalore</code> — each row has a 1 in exactly one of them.</p>
+    </div>
+
+    <table>
+      <tr><th>City</th><th>is_Delhi</th><th>is_Bangalore</th></tr>
+      <tr><td>Mumbai</td><td>0</td><td>0</td></tr>
+      <tr><td>Delhi</td><td>1</td><td>0</td></tr>
+      <tr><td>Bangalore</td><td>0</td><td>1</td></tr>
+    </table>
+
+    <div class="box mistake">
+      <span class="tagline">The dummy-variable trap</span>
+      <p style="margin-bottom:0">Notice only two columns were needed for three cities — Mumbai is implied when both are 0. Including a column for every single category <em>plus</em> an intercept creates perfect multicollinearity (the columns always sum to 1), which breaks the normal equation. Always drop one category as the reference/baseline.</p>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch20">← Feature Scaling</a><a href="#ch22">Next: Polynomial Regression →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 22 ================= -->
+  <section class="chapter" id="ch22">
+    <span class="chnum">CHAPTER 22</span>
+    <h2>Polynomial Regression <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Fitting curves — while staying, mathematically, "linear regression."</p>
+
+    <div class="box formula"><span class="tagline">Example</span><div class="f">y = b₀ + b₁x + b₂x²</div></div>
+
+    <div class="box why">
+      <span class="tagline">Why this still counts as "linear" regression</span>
+      <p style="margin-bottom:0">Polynomial Regression is still linear <em>in the coefficients</em> — b₀, b₁, and b₂ each multiply a fixed input column (x, x², …) additively, exactly like ordinary multiple regression, just with x² treated as if it were simply another feature. The curve in x-y space comes from the feature engineering, not from any change to how OLS solves for coefficients.</p>
+    </div>
+
+    <div class="widget" id="polyWidget">
+      <strong>Interactive — Polynomial Fit &amp; Model Complexity</strong>
+      <div class="controls">
+        <button data-deg="1" class="polyBtn active">Degree 1 (underfit)</button>
+        <button data-deg="2" class="polyBtn">Degree 2 (good fit)</button>
+        <button data-deg="9" class="polyBtn">Degree 9 (overfit)</button>
+      </div>
+      <svg id="polySvg" viewBox="0 0 600 300"></svg>
+      <div class="readout" id="polyReadout"></div>
+      <div class="wcaption">Same curved dataset, three model complexities. Degree 9 chases every training point, including noise — this is overfitting.</div>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch21">← Categorical Variables</a><a href="#ch23">Next: Regularization →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 23 ================= -->
+  <section class="chapter" id="ch23">
+    <span class="chnum">CHAPTER 23</span>
+    <h2>Regularization <span class="diff adv">🔴 Advanced</span></h2>
+    <p class="deck">Ridge, Lasso, and Elastic Net — controlling complexity on purpose.</p>
+
+    <div class="box why">
+      <span class="tagline">The problem this solves</span>
+      <p style="margin-bottom:0">What happens when we have too many features, or features that are highly correlated with each other? Coefficients can blow up to large, unstable values that fit the training data suspiciously well but generalize poorly. Regularization adds a penalty for coefficient size directly into the loss function being minimized.</p>
+    </div>
+
+    <table>
+      <tr><th>Method</th><th>Penalty</th><th>Effect</th></tr>
+      <tr><td>Ridge</td><td>L2 (sum of squared coefficients)</td><td>Shrinks coefficients toward zero, rarely to exactly zero</td></tr>
+      <tr><td>Lasso</td><td>L1 (sum of absolute coefficients)</td><td>Can shrink some coefficients to exactly zero — performs feature selection</td></tr>
+      <tr><td>Elastic Net</td><td>Blend of L1 and L2</td><td>Combines shrinkage with occasional exact zeroing</td></tr>
+    </table>
+
+    <div class="widget" id="rlWidget">
+      <strong>Interactive — Ridge vs. Lasso Shrinkage</strong>
+      <div class="controls">
+        <label>Penalty strength (λ) <input type="range" id="rlLambda" min="0" max="10" step="0.5" value="0"></label>
+        <label><input type="radio" name="rlMode" value="ridge" checked> Ridge</label>
+        <label><input type="radio" name="rlMode" value="lasso"> Lasso</label>
+      </div>
+      <svg id="rlSvg" viewBox="0 0 600 260"></svg>
+      <div class="readout" id="rlReadout"></div>
+      <div class="wcaption">Five example coefficients shrinking as λ increases. Watch how Lasso can drive small coefficients all the way to zero, while Ridge only ever shrinks them toward — not to — zero.</div>
+    </div>
+
+    <div class="box why"><span class="tagline">Why Lasso performs feature selection</span><p style="margin-bottom:0">The L1 penalty's geometry (a diamond-shaped constraint region, versus Ridge's circular one) means the optimal solution is more likely to land exactly on an axis — where one or more coefficients are precisely zero — rather than merely close to it.</p></div>
+
+    <div class="navbtnrow"><a href="#ch22">← Polynomial Regression</a><a href="#ch24">Next: Bias &amp; Variance →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 24 ================= -->
+  <section class="chapter" id="ch24">
+    <span class="chnum">CHAPTER 24</span>
+    <h2>Bias and Variance <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">The trade-off underneath every modeling decision you'll ever make.</p>
+
+    <table>
+      <tr><th>Underfitting</th><th>Good fit</th><th>Overfitting</th></tr>
+      <tr><td>High bias — model too simple to capture the pattern</td><td>Balanced — captures the real pattern, ignores noise</td><td>High variance — model captures noise as if it were pattern</td></tr>
+      <tr><td>Poor performance on train <em>and</em> test</td><td>Good performance on train and test</td><td>Great performance on train, poor on test</td></tr>
+    </table>
+
+    <p>This directly connects back to the polynomial widget in Chapter 22 (model complexity / polynomial degree) and the regularization widget in Chapter 23 (adding a penalty to rein in an overfit model). As model complexity rises, training error keeps falling — but test error eventually turns upward. The best model sits at that turning point, not at either extreme.</p>
+
+    <div class="navbtnrow"><a href="#ch23">← Regularization</a><a href="#ch25">Next: Complete ML Workflow →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 25 ================= -->
+  <section class="chapter" id="ch25">
+    <span class="chnum">CHAPTER 25</span>
+    <h2>Complete ML Workflow <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Zooming all the way out — where everything in this course fits into a real project.</p>
+
+    <div class="card">
+      <strong>Raw Data → Understand business problem → EDA → Clean data → Select features → Train/test split → Preprocessing → Train model → Predict → Evaluate → Residual diagnostics → Tune / improve → Validate → Deploy / communicate</strong>
+    </div>
+    <p>Every arrow here maps to a chapter you've already read: EDA and cleaning inform which assumptions might already be violated (Ch. 16); the split protects your evaluation (Ch. 12); training is OLS or gradient descent (Ch. 5, 9); evaluating means MAE/MSE/RMSE/R² (Ch. 13–14); diagnostics means residual analysis (Ch. 17); tuning often means regularization or feature changes (Ch. 18, 23).</p>
+
+    <div class="navbtnrow"><a href="#ch24">← Bias &amp; Variance</a><a href="#ch26">Next: Linear Regression in Python →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 26 ================= -->
+  <section class="chapter" id="ch26">
+    <span class="chnum">CHAPTER 26</span>
+    <h2>Linear Regression in Python <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">Turning every idea in this course into six lines of working code.</p>
+
+    <pre><code>from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+
+# X: feature matrix (e.g. advertising spend), y: target (sales)
+X = np.array([[1],[2],[3],[4],[5]])
+y = np.array([2,4,5,7,8])
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)          # solves for b0, b1 (Chapter 6)
+
+y_pred = model.predict(X_test)       # generates ŷ for held-out data (Chapter 12)
+
+print("Intercept:", model.intercept_)   # b0
+print("Slope:", model.coef_)            # b1
+print("MAE:", mean_absolute_error(y_test, y_pred))
+print("MSE:", mean_squared_error(y_test, y_pred))
+print("RMSE:", mean_squared_error(y_test, y_pred, squared=False))
+print("R2:", r2_score(y_test, y_pred))
+</code></pre>
+
+    <p><code>train_test_split</code> performs the split from Chapter 12. <code>model.fit()</code> runs the least-squares calculation from Chapter 6 internally. <code>model.intercept_</code> and <code>model.coef_</code> are exactly b₀ and b₁. The three metric functions are exactly the formulas from Chapter 13–14 — nothing here is new math, only new syntax.</p>
+
+    <div class="navbtnrow"><a href="#ch25">← Complete ML Workflow</a><a href="#ch27">Next: Practical Project →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 27 ================= -->
+  <section class="chapter" id="ch27">
+    <span class="chnum">CHAPTER 27</span>
+    <h2>Complete Practical Project — Predicting House Prices <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">Every chapter, applied in sequence, on a realistic mini-project.</p>
+
+    <ol>
+      <li><strong>Problem definition:</strong> predict sale price from area, bedrooms, bathrooms, age, and encoded location, to support a pricing-recommendation tool.</li>
+      <li><strong>Dataset inspection:</strong> check column types, missing values, and ranges before touching the model.</li>
+      <li><strong>EDA:</strong> scatter each feature against price; check for obvious non-linearity or outliers (Ch. 16, 19).</li>
+      <li><strong>Feature selection:</strong> drop or combine redundant size-related features to reduce multicollinearity (Ch. 18).</li>
+      <li><strong>Preprocessing:</strong> one-hot encode location (Ch. 21); scaling is optional for plain OLS (Ch. 20).</li>
+      <li><strong>Train/test split:</strong> hold out 20% of houses, never touched until final evaluation (Ch. 12).</li>
+      <li><strong>Model training:</strong> fit <code>LinearRegression</code> on the training set (Ch. 6, 26).</li>
+      <li><strong>Prediction:</strong> generate ŷ for the held-out houses.</li>
+      <li><strong>Evaluation:</strong> report MAE, RMSE, and R² together, not R² alone (Ch. 13–14).</li>
+      <li><strong>Residual analysis:</strong> plot residuals vs. predicted price; check for funnel or curve patterns (Ch. 17).</li>
+      <li><strong>Interpretation:</strong> read coefficients with "holding other variables constant" (Ch. 10).</li>
+      <li><strong>Limitations:</strong> note that the model assumes linearity and won't capture, say, a sudden neighborhood gentrification effect.</li>
+      <li><strong>Business recommendation:</strong> translate the model into a plain-language pricing guideline, with the honest caveat that predictions carry uncertainty (typical RMSE), not false precision.</li>
+    </ol>
+
+    <div class="navbtnrow"><a href="#ch26">← Linear Regression in Python</a><a href="#ch28">Next: Common Mistakes →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 28 ================= -->
+  <section class="chapter" id="ch28">
+    <span class="chnum">CHAPTER 28</span>
+    <h2>Common Mistakes <span class="diff mid">🟡 Intermediate</span></h2>
+    <p class="deck">A checklist worth reviewing before every regression project you ship.</p>
+
+    <div class="box mistake"><span class="tagline">Using R² alone</span><p style="margin-bottom:0">Correct thinking: always pair R² with an error metric in real units (MAE/RMSE) and a residual plot.</p></div>
+    <div class="box mistake"><span class="tagline">Evaluating only on training data</span><p style="margin-bottom:0">Correct thinking: always hold out a genuine test set before trusting any performance number.</p></div>
+    <div class="box mistake"><span class="tagline">Assuming correlation means causation</span><p style="margin-bottom:0">Correct thinking: a coefficient describes association within the model, not a proven causal mechanism.</p></div>
+    <div class="box mistake"><span class="tagline">Ignoring residual patterns</span><p style="margin-bottom:0">Correct thinking: a good aggregate score can still hide a systematically wrong sub-region of the data.</p></div>
+    <div class="box mistake"><span class="tagline">Ignoring outliers</span><p style="margin-bottom:0">Correct thinking: check whether outliers are data errors, genuinely rare events, or influential points pulling the whole line.</p></div>
+    <div class="box mistake"><span class="tagline">Leaking test data</span><p style="margin-bottom:0">Correct thinking: fit any scaler, encoder, or imputer only on the training set, then apply it unchanged to the test set.</p></div>
+    <div class="box mistake"><span class="tagline">Interpreting coefficients incorrectly</span><p style="margin-bottom:0">Correct thinking: always read a coefficient as "holding other features constant" — never in isolation.</p></div>
+    <div class="box mistake"><span class="tagline">Assuming linear relationships everywhere</span><p style="margin-bottom:0">Correct thinking: check the scatter plot and residuals — reach for polynomial terms or another model family when the shape is clearly curved.</p></div>
+    <div class="box mistake"><span class="tagline">Blindly removing features because of correlation</span><p style="margin-bottom:0">Correct thinking: correlation with the target is good; correlation <em>between features</em> is the concern — don't confuse the two.</p></div>
+    <div class="box mistake"><span class="tagline">Confusing MAE and RMSE</span><p style="margin-bottom:0">Correct thinking: RMSE penalizes large errors more heavily; pick based on whether large mistakes are especially costly.</p></div>
+    <div class="box mistake"><span class="tagline">Thinking Linear Regression means only one feature</span><p style="margin-bottom:0">Correct thinking: multiple regression (Ch. 10), polynomial terms (Ch. 22), and encoded categories (Ch. 21) are all still "linear regression."</p></div>
+    <div class="box mistake"><span class="tagline">Assuming higher R² automatically means a better model</span><p style="margin-bottom:0">Correct thinking: R² mechanically rises with added features — check adjusted R² and test-set performance instead.</p></div>
+
+    <div class="navbtnrow"><a href="#ch27">← Practical Project</a><a href="#ch29">Next: Interview Prep →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 29 ================= -->
+  <section class="chapter" id="ch29">
+    <span class="chnum">CHAPTER 29</span>
+    <h2>Interview Preparation <span class="diff adv">🔴 Beginner → Advanced</span></h2>
+    <p class="deck">Every question below follows: short answer → deep explanation → interview-ready phrasing.</p>
+
+    <h3>Beginner</h3>
+    <details><summary>What is Linear Regression?</summary><p><strong>Short:</strong> A method that models the relationship between a target and one or more features as a straight line (or plane).<br><strong>Deep:</strong> It finds the specific line that minimizes total squared prediction error across the training data (OLS).<br><strong>Interview-ready:</strong> "Linear Regression fits the line that minimizes the sum of squared residuals between predicted and actual values, giving a simple, interpretable model for continuous targets."</p></details>
+    <details><summary>What is the difference between regression and classification?</summary><p><strong>Short:</strong> Regression predicts a continuous number; classification predicts a category.<br><strong>Deep:</strong> The choice of loss function and evaluation metrics differ accordingly — squared error and R² for regression, versus accuracy/precision/recall for classification.<br><strong>Interview-ready:</strong> "Regression outputs a number on a continuum, like price; classification outputs a discrete label, like spam or not spam."</p></details>
+    <details><summary>What is slope?</summary><p><strong>Short:</strong> How much the predicted target changes per one-unit increase in the feature.<br><strong>Deep:</strong> Mathematically, it's the ratio of how x and y co-vary to how much x varies on its own.<br><strong>Interview-ready:</strong> "Slope (b₁) is the expected change in the target for a one-unit increase in the feature, holding other features constant."</p></details>
+    <details><summary>What is intercept?</summary><p><strong>Short:</strong> The predicted value when all features equal zero.<br><strong>Deep:</strong> It's mathematically necessary to position the line correctly, even when "all features = 0" isn't a realistic scenario.<br><strong>Interview-ready:</strong> "The intercept (b₀) is where the regression line crosses the y-axis — the baseline prediction before any feature effect is added."</p></details>
+    <details><summary>What is a residual?</summary><p><strong>Short:</strong> Actual value minus predicted value.<br><strong>Deep:</strong> Every regression metric (SSE, MSE, RMSE, R²) is built directly from residuals.<br><strong>Interview-ready:</strong> "A residual measures how far off a single prediction was — it's the raw material behind every evaluation metric."</p></details>
+    <details><summary>What is MSE?</summary><p><strong>Short:</strong> The average squared residual.<br><strong>Deep:</strong> It's what OLS minimizes (up to a constant factor); squaring removes cancellation and penalizes large errors more.<br><strong>Interview-ready:</strong> "MSE is the average of the squared prediction errors — the quantity OLS is directly optimizing."</p></details>
+    <details><summary>What is R²?</summary><p><strong>Short:</strong> The proportion of variance in the target explained by the model, relative to always predicting the mean.<br><strong>Deep:</strong> R² = 1 − SSE/SST; it can be negative if the model is worse than the mean baseline.<br><strong>Interview-ready:</strong> "R² tells you how much better your model is than a naive mean-prediction baseline, on a 0-to-1 scale (with negative values possible for a poor fit)."</p></details>
+
+    <h3>Intermediate</h3>
+    <details><summary>Why do we square errors?</summary><p><strong>Short:</strong> To prevent positive and negative errors from canceling, and to penalize large errors more.<br><strong>Deep:</strong> Squaring also produces a smooth, differentiable cost function with one unique minimum, which is why the closed-form OLS solution exists.<br><strong>Interview-ready:</strong> "Squaring avoids error cancellation and gives a convex loss surface with a single global minimum, which is what makes the closed-form least-squares solution possible."</p></details>
+    <details><summary>Why use RMSE instead of MSE?</summary><p><strong>Short:</strong> RMSE is in the same units as the target, so it's directly interpretable.<br><strong>Deep:</strong> MSE is in squared units (e.g. "dollars²"), which is mathematically convenient for optimization but meaningless to a stakeholder.<br><strong>Interview-ready:</strong> "RMSE is the square root of MSE, bringing the error back into the original units of the target for interpretability."</p></details>
+    <details><summary>What assumptions does Linear Regression make?</summary><p><strong>Short:</strong> Linearity, independence, homoscedasticity, normal residuals, and (for multiple regression) low multicollinearity.<br><strong>Deep:</strong> Violating point predictions' assumptions (linearity, homoscedasticity) hurts accuracy directly; violating others (normality, independence) mainly hurts inference (confidence intervals, p-values).<br><strong>Interview-ready:</strong> "Linearity, independent errors, constant error variance, roughly normal residuals, and limited multicollinearity between predictors."</p></details>
+    <details><summary>What is multicollinearity?</summary><p><strong>Short:</strong> When predictor variables are highly correlated with each other.<br><strong>Deep:</strong> It doesn't hurt overall prediction accuracy much, but makes individual coefficient estimates unstable and hard to interpret.<br><strong>Interview-ready:</strong> "Multicollinearity is high correlation between features, which destabilizes individual coefficient estimates even if overall model fit remains fine."</p></details>
+    <details><summary>What happens when assumptions are violated?</summary><p><strong>Short:</strong> Depends which one — some hurt predictions, others hurt statistical inference.<br><strong>Deep:</strong> Non-linearity and heteroscedasticity bias or destabilize predictions; non-normality and non-independence mainly undermine confidence intervals and significance tests.<br><strong>Interview-ready:</strong> "It depends on which assumption — non-linearity directly hurts accuracy, while non-normal residuals mostly affect the validity of statistical inference rather than the predictions themselves."</p></details>
+    <details><summary>Difference between MAE and RMSE?</summary><p><strong>Short:</strong> MAE weighs every error equally; RMSE weighs large errors more heavily.<br><strong>Deep:</strong> Both are in the same units as the target, but they can disagree on which model is "better" when error distributions differ.<br><strong>Interview-ready:</strong> "MAE is the average absolute error; RMSE is the square root of average squared error, so it's more sensitive to large mistakes."</p></details>
+    <details><summary>What is adjusted R²?</summary><p><strong>Short:</strong> R² penalized for the number of features used.<br><strong>Deep:</strong> Plain R² never decreases when you add a feature, even a useless one — adjusted R² can decrease if a feature doesn't earn its complexity cost.<br><strong>Interview-ready:</strong> "Adjusted R² corrects R² for the number of predictors, so it doesn't reward adding irrelevant features."</p></details>
+    <details><summary>Why split train and test data?</summary><p><strong>Short:</strong> To estimate performance on unseen data honestly.<br><strong>Deep:</strong> Evaluating on training data risks measuring memorization rather than generalization.<br><strong>Interview-ready:</strong> "The test set simulates unseen future data, giving an honest estimate of how the model will perform in production."</p></details>
+
+    <h3>Advanced</h3>
+    <details><summary>OLS vs Gradient Descent</summary><p><strong>Short:</strong> OLS is a direct, closed-form calculation; gradient descent is iterative.<br><strong>Deep:</strong> OLS is efficient for small/medium feature counts but becomes computationally expensive as features grow (matrix inversion cost); gradient descent scales better and generalizes to models without closed-form solutions.<br><strong>Interview-ready:</strong> "OLS solves for coefficients directly via the normal equation; gradient descent finds them iteratively, which matters more as feature count and data size grow, or when no closed-form solution exists."</p></details>
+    <details><summary>Why can R² be negative?</summary><p><strong>Short:</strong> When the model's SSE exceeds the mean-baseline's SST.<br><strong>Deep:</strong> This happens when a model is badly misspecified for the data it's evaluated on (e.g. trained on one distribution, tested on a very different one).<br><strong>Interview-ready:</strong> "R² is negative when the model performs worse than simply predicting the mean — a sign of serious misspecification or a train/test distribution mismatch."</p></details>
+    <details><summary>Why is Linear Regression sensitive to outliers?</summary><p><strong>Short:</strong> Because it minimizes squared error, and squaring amplifies large deviations.<br><strong>Deep:</strong> A single far-away point can contribute more to SSE than dozens of well-fit points combined, pulling the whole line toward it.<br><strong>Interview-ready:</strong> "Squared-error loss weights large residuals disproportionately, so a single extreme point can dominate the fit."</p></details>
+    <details><summary>What happens under multicollinearity?</summary><p><strong>Short:</strong> Coefficient estimates become unstable and hard to trust individually.<br><strong>Deep:</strong> In the extreme (perfect collinearity), the (XᵀX) matrix becomes singular and can't be inverted at all.<br><strong>Interview-ready:</strong> "Coefficients become unstable, sometimes flipping sign with small data changes, and in extreme cases the normal equation can't be solved because XᵀX is singular."</p></details>
+    <details><summary>Ridge vs Lasso</summary><p><strong>Short:</strong> Ridge shrinks coefficients toward zero; Lasso can push some exactly to zero.<br><strong>Deep:</strong> This comes from the geometry of the L2 (circular) vs. L1 (diamond) constraint region — L1's corners make exact zeros more likely.<br><strong>Interview-ready:</strong> "Ridge uses an L2 penalty and shrinks coefficients smoothly; Lasso uses an L1 penalty and can zero out coefficients entirely, giving built-in feature selection."</p></details>
+    <details><summary>Why does Lasso perform feature selection?</summary><p><strong>Short:</strong> Its L1 penalty's geometry favors solutions that land exactly on an axis.<br><strong>Deep:</strong> Unlike Ridge's smooth circular constraint, Lasso's diamond-shaped constraint has corners on the axes, where one or more coefficients are exactly zero — the optimum is more likely to land there.<br><strong>Interview-ready:</strong> "The L1 penalty's constraint region has corners at zero, so the optimal solution often lands exactly on an axis — effectively dropping that feature."</p></details>
+    <details><summary>What happens when XᵀX is singular?</summary><p><strong>Short:</strong> The normal equation can't be solved directly — no unique inverse exists.<br><strong>Deep:</strong> This happens with perfect multicollinearity or more features than observations; regularization (which adds a small value to the diagonal) or dimensionality reduction can fix it.<br><strong>Interview-ready:</strong> "A singular XᵀX means the normal equation has no unique solution — usually from perfect multicollinearity or more features than rows — and regularization is a standard fix."</p></details>
+    <details><summary>What does the normal equation represent?</summary><p><strong>Short:</strong> The closed-form solution for the coefficients that minimize squared error.<br><strong>Deep:</strong> β = (XᵀX)⁻¹Xᵀy comes from setting the derivative of the SSE cost function to zero and solving directly.<br><strong>Interview-ready:</strong> "It's the direct, analytical solution for the OLS coefficients, derived by setting the gradient of the squared-error cost function to zero."</p></details>
+
+    <div class="navbtnrow"><a href="#ch28">← Common Mistakes</a><a href="#ch30">Next: Visual Mental Models →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 30 ================= -->
+  <section class="chapter" id="ch30">
+    <span class="chnum">CHAPTER 30</span>
+    <h2>Visual Mental Models <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">One picture tying every concept in this course together.</p>
+
+    <div class="card">
+      <strong>Data → Relationship → Line → Residuals → Loss → Optimization → Prediction → Evaluation → Diagnostics</strong>
+      <p style="margin-bottom:0">Read this chain left to right, and every chapter you've completed slots into exactly one link.</p>
+    </div>
+
+    <div class="grid3">
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>Slope · Intercept</strong><br>define the line (Ch. 2–3, 6)</p></div>
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>Residual · SSE · MSE · RMSE</strong><br>measure how wrong the line is (Ch. 4–5, 13)</p></div>
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>R²</strong><br>compares the line to the mean baseline (Ch. 14)</p></div>
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>OLS · Gradient Descent</strong><br>the two ways to find the minimum (Ch. 6, 9)</p></div>
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>Assumptions</strong><br>the conditions the whole approach relies on (Ch. 16–17)</p></div>
+      <div class="mini"><p style="font-size:14px; margin-top:4px;"><strong>Regularization · Overfitting</strong><br>controlling complexity on purpose (Ch. 22–24)</p></div>
+    </div>
+
+    <div class="navbtnrow"><a href="#ch29">← Interview Prep</a><a href="#ch31">Next: Cheat Sheet →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 31 ================= -->
+  <section class="chapter" id="ch31">
+    <span class="chnum">CHAPTER 31</span>
+    <h2>Cheat Sheet <span class="diff beg">🟢 Beginner</span></h2>
+    <p class="deck">One compact page — everything above, compressed.</p>
+
+    <h3>Core formulas</h3>
+    <table>
+      <tr><th>Name</th><th>Formula</th></tr>
+      <tr><td>Prediction</td><td>ŷ = b₀ + b₁x</td></tr>
+      <tr><td>Residual</td><td>Actual − Predicted</td></tr>
+      <tr><td>SSE</td><td>Σ(yᵢ − ŷᵢ)²</td></tr>
+      <tr><td>MSE</td><td>(1/n)Σ(yᵢ − ŷᵢ)²</td></tr>
+      <tr><td>RMSE</td><td>√MSE</td></tr>
+      <tr><td>R²</td><td>1 − SSE/SST</td></tr>
+      <tr><td>Slope</td><td>b₁ = Σ(x−x̄)(y−ȳ) / Σ(x−x̄)²</td></tr>
+      <tr><td>Intercept</td><td>b₀ = ȳ − b₁x̄</td></tr>
+      <tr><td>Normal Equation</td><td>β = (XᵀX)⁻¹Xᵀy</td></tr>
+      <tr><td>Ridge penalty</td><td>SSE + λΣb²</td></tr>
+      <tr><td>Lasso penalty</td><td>SSE + λΣ|b|</td></tr>
+    </table>
+
+    <h3>Key definitions</h3>
+    <p>Feature · Target · Prediction · Residual · Coefficient · Intercept · Overfitting · Multicollinearity · Homoscedasticity — see the full <a href="#glossary">Glossary</a> for one-line definitions of each.</p>
+
+    <h3>Evaluation checklist</h3>
+    <ul class="checklist">
+      <li>Did I split train/test before any preprocessing?</li>
+      <li>Did I report MAE or RMSE alongside R²?</li>
+      <li>Did I plot residuals vs. predicted values?</li>
+      <li>Did I check for multicollinearity among features?</li>
+      <li>Did I check for outliers and influential points?</li>
+      <li>Did I interpret coefficients with "holding other variables constant"?</li>
+    </ul>
+
+    <div class="navbtnrow"><a href="#ch30">← Visual Mental Models</a><a href="#ch32">Next: Final Knowledge Test →</a></div>
+  </section>
+
+  <!-- ================= CHAPTER 32 ================= -->
+  <section class="chapter" id="ch32">
+    <span class="chnum">CHAPTER 32</span>
+    <h2>Final Knowledge Test <span class="diff mid">🟡 Self-Assessment</span></h2>
+    <p class="deck">40 questions across five formats. Answers are hidden — click to reveal, and read the explanation, not just the letter.</p>
+
+    <h3>Multiple choice (15)</h3>
+    <details><summary>1. Residual is defined as:</summary><p>Actual − Predicted. It measures the vertical gap between an observed point and the model's prediction for that point.</p></details>
+    <details><summary>2. OLS minimizes:</summary><p>The sum of squared residuals (SSE). This is the defining property of ordinary least squares.</p></details>
+    <details><summary>3. RMSE is:</summary><p>The square root of MSE. This returns the error to the same units as the target variable.</p></details>
+    <details><summary>4. R² = 0 means:</summary><p>The model performs exactly as well as always predicting the mean of y — no better, no worse.</p></details>
+    <details><summary>5. R² can be negative when:</summary><p>The model's SSE is larger than SST — meaning it performs worse than the mean baseline.</p></details>
+    <details><summary>6. Homoscedasticity refers to:</summary><p>Constant variance of residuals across all predicted values — the opposite of a funnel-shaped residual plot.</p></details>
+    <details><summary>7. One-hot encoding is used for:</summary><p>Converting categorical variables into multiple binary (0/1) columns so a numeric model can use them.</p></details>
+    <details><summary>8. Ridge regression uses:</summary><p>An L2 penalty — the sum of squared coefficients — added to the loss function.</p></details>
+    <details><summary>9. Lasso regression can:</summary><p>Shrink coefficients exactly to zero, effectively performing feature selection.</p></details>
+    <details><summary>10. A high VIF value suggests:</summary><p>The feature is highly predictable from the other features — a sign of multicollinearity.</p></details>
+    <details><summary>11. The normal equation is:</summary><p>β = (XᵀX)⁻¹Xᵀy — the closed-form solution for OLS coefficients.</p></details>
+    <details><summary>12. Gradient descent is most useful when:</summary><p>The dataset or feature count is large enough that the closed-form normal equation becomes computationally expensive.</p></details>
+    <details><summary>13. Polynomial regression with y = b₀ + b₁x + b₂x² is:</summary><p>Still linear in its coefficients — the "linear" in linear regression refers to the coefficients, not the shape of the curve.</p></details>
+    <details><summary>14. Overfitting is characterized by:</summary><p>Very low training error paired with much higher test error — the model has learned noise, not just signal.</p></details>
+    <details><summary>15. Data leakage most commonly happens when:</summary><p>Preprocessing (like scaling) is fit on the full dataset before the train/test split, letting test-set information influence training.</p></details>
+
+    <h3>Conceptual (10)</h3>
+    <details><summary>1. Why does squaring errors prevent cancellation?</summary><p>Because squaring makes every term non-negative, so a positive and a negative error of equal size no longer sum to zero.</p></details>
+    <details><summary>2. Why might a low RMSE still hide a bad model?</summary><p>Because RMSE is a single aggregate number — it can look fine overall while a residual plot reveals the model is systematically wrong in one region of the data.</p></details>
+    <details><summary>3. Why can't the intercept always be interpreted literally?</summary><p>Because it represents the prediction when all features are zero, which is often outside the realistic range of the data.</p></details>
+    <details><summary>4. Why does adding features never decrease plain R²?</summary><p>Because OLS can always assign a near-zero coefficient to a useless feature, so SSE can never increase — hence R² can never decrease.</p></details>
+    <details><summary>5. Why is "holding other variables constant" essential when reading coefficients?</summary><p>Because correlated features can otherwise make a coefficient reflect a mix of effects rather than the isolated effect of that one feature.</p></details>
+    <details><summary>6. Why does multicollinearity not usually hurt overall prediction accuracy?</summary><p>Because the combined effect of the correlated features on the prediction stays stable even when their individual coefficients trade weight unpredictably.</p></details>
+    <details><summary>7. Why is scaling more important for gradient descent than for OLS?</summary><p>Because gradient descent's step sizes are sensitive to feature scale, which can cause slow or unstable convergence — the closed-form OLS solution isn't affected the same way.</p></details>
+    <details><summary>8. Why does Lasso's L1 penalty create sparsity but Ridge's L2 penalty doesn't?</summary><p>Because the L1 constraint region has sharp corners on the coordinate axes, making exact-zero solutions geometrically more likely than under the smooth, rounded L2 constraint.</p></details>
+    <details><summary>9. Why is a residual plot more informative than a single accuracy number?</summary><p>Because it reveals patterns (curvature, funneling) across the range of predictions that a single aggregate metric averages away.</p></details>
+    <details><summary>10. Why does correlation not imply causation?</summary><p>Because a third, unobserved variable can drive both variables at once, producing a strong statistical association without either causing the other.</p></details>
+
+    <h3>Numerical (5)</h3>
+    <details><summary>1. Given actual=12, predicted=9, what is the residual?</summary><p>3 (12 − 9).</p></details>
+    <details><summary>2. For residuals [2, −2, 3], what is SSE?</summary><p>4 + 4 + 9 = 17.</p></details>
+    <details><summary>3. If SSE = 17 and n = 3, what is MSE?</summary><p>17 / 3 ≈ 5.67.</p></details>
+    <details><summary>4. If MSE ≈ 5.67, what is RMSE?</summary><p>√5.67 ≈ 2.38.</p></details>
+    <details><summary>5. If SSE = 10 and SST = 50, what is R²?</summary><p>1 − (10/50) = 0.8.</p></details>
+
+    <h3>Interpret this graph (5)</h3>
+    <details><summary>1. A residual plot showing a clear U-shape curve suggests:</summary><p>The linearity assumption is violated — a polynomial term or transformation may help.</p></details>
+    <details><summary>2. A residual plot that fans out like a funnel as predicted values increase suggests:</summary><p>Heteroscedasticity — non-constant variance of residuals.</p></details>
+    <details><summary>3. A scatter plot where a single far-away point visibly tilts the regression line suggests:</summary><p>An influential outlier is disproportionately affecting the fitted coefficients.</p></details>
+    <details><summary>4. A training-error-vs-test-error chart where both curves stay high and close together suggests:</summary><p>Underfitting — the model is too simple to capture the underlying pattern.</p></details>
+    <details><summary>5. A training-error-vs-test-error chart where training error is near zero but test error is high suggests:</summary><p>Overfitting — the model has memorized training-specific noise rather than general patterns.</p></details>
+
+    <h3>Interview-style (5)</h3>
+    <details><summary>1. Explain Linear Regression to someone with no ML background.</summary><p>It draws the straight line through your data that makes the smallest possible total squared distance between the line and the actual points, then uses that line to predict new values.</p></details>
+    <details><summary>2. Your model has high R² on training data but poor performance in production. What's happening?</summary><p>Likely overfitting, or a data leakage issue during training/evaluation — investigate whether preprocessing was fit only on training data and whether model complexity is appropriate.</p></details>
+    <details><summary>3. A stakeholder asks why a coefficient is negative when they "know" the relationship should be positive. What do you check?</summary><p>Multicollinearity between that feature and a correlated one, sign of the raw correlation with the target alone, and whether "holding other variables constant" is being misread as an unconditional relationship.</p></details>
+    <details><summary>4. When would you choose Lasso over Ridge?</summary><p>When you suspect many features are irrelevant and want the model to perform feature selection automatically by zeroing out their coefficients.</p></details>
+    <details><summary>5. How would you explain R² being negative to a non-technical audience?</summary><p>It means the model is making things worse than simply guessing the average outcome every time — a signal that something is seriously wrong with the model or the data it was evaluated on.</p></details>
+
+    <div class="navbtnrow"><a href="#ch31">← Cheat Sheet</a><a href="#glossary">Next: Glossary →</a></div>
+  </section>
+
+  <!-- ================= GLOSSARY ================= -->
+  <section class="chapter" id="glossary">
+    <span class="chnum">GLOSSARY</span>
+    <h2>Alphabetical Glossary</h2>
+    <p class="deck">Every important term, one line each: definition, then practical meaning.</p>
+
+    <div class="glossline"><b>Adjusted R²</b> — R² penalized for the number of predictors used. <em>Practical meaning:</em> prevents rewarding a model just for adding more features.</div>
+    <div class="glossline"><b>Bias</b> — Error from overly simplistic assumptions in the model. <em>Practical meaning:</em> high bias shows up as underfitting.</div>
+    <div class="glossline"><b>Coefficient</b> — A number multiplying a feature in the regression equation. <em>Practical meaning:</em> its size and sign describe that feature's estimated effect.</div>
+    <div class="glossline"><b>Data leakage</b> — Test-set information improperly influencing training. <em>Practical meaning:</em> always fit preprocessing on the training set only.</div>
+    <div class="glossline"><b>Feature</b> — An input variable used to make a prediction. <em>Practical meaning:</em> what goes in on the x-side of the equation.</div>
+    <div class="glossline"><b>Heteroscedasticity</b> — Non-constant variance of residuals. <em>Practical meaning:</em> shows up as a funnel shape in residual plots.</div>
+    <div class="glossline"><b>Homoscedasticity</b> — Constant variance of residuals. <em>Practical meaning:</em> the healthy, assumption-satisfying opposite of heteroscedasticity.</div>
+    <div class="glossline"><b>Influential point</b> — An observation whose removal meaningfully changes the fitted line. <em>Practical meaning:</em> worth investigating individually, not just averaging away.</div>
+    <div class="glossline"><b>Intercept</b> — The predicted value when all features equal zero (b₀). <em>Practical meaning:</em> positions the line vertically; often not literally meaningful.</div>
+    <div class="glossline"><b>Lasso</b> — Regression with an L1 (absolute-value) coefficient penalty. <em>Practical meaning:</em> can zero out irrelevant features automatically.</div>
+    <div class="glossline"><b>Leverage</b> — How unusual an observation's feature values are. <em>Practical meaning:</em> high-leverage points have more potential to influence the fit.</div>
+    <div class="glossline"><b>MSE</b> — Mean Squared Error, the average squared residual. <em>Practical meaning:</em> the quantity OLS directly minimizes.</div>
+    <div class="glossline"><b>Multicollinearity</b> — High correlation among predictor features. <em>Practical meaning:</em> destabilizes individual coefficient estimates.</div>
+    <div class="glossline"><b>OLS</b> — Ordinary Least Squares, the method of finding coefficients that minimize SSE. <em>Practical meaning:</em> the default fitting method for standard linear regression.</div>
+    <div class="glossline"><b>Outlier</b> — A data point far from the general trend. <em>Practical meaning:</em> can disproportionately affect a squared-error model.</div>
+    <div class="glossline"><b>Overfitting</b> — Fitting training data (including its noise) too closely. <em>Practical meaning:</em> good training performance, poor generalization.</div>
+    <div class="glossline"><b>Prediction (ŷ)</b> — The model's output for a given input. <em>Practical meaning:</em> what you actually deliver to a downstream system or user.</div>
+    <div class="glossline"><b>R²</b> — Proportion of variance explained relative to the mean baseline. <em>Practical meaning:</em> a normalized, unitless goodness-of-fit summary.</div>
+    <div class="glossline"><b>Regularization</b> — Adding a penalty for coefficient size to the loss function. <em>Practical meaning:</em> controls model complexity and helps generalization.</div>
+    <div class="glossline"><b>Ridge</b> — Regression with an L2 (squared) coefficient penalty. <em>Practical meaning:</em> shrinks coefficients smoothly without zeroing them out.</div>
+    <div class="glossline"><b>RMSE</b> — Square root of MSE. <em>Practical meaning:</em> error in the same units as the target, still sensitive to large errors.</div>
+    <div class="glossline"><b>Slope</b> — How much the prediction changes per one-unit increase in a feature (b₁). <em>Practical meaning:</em> the direct, interpretable "effect size" of a feature.</div>
+    <div class="glossline"><b>SSE</b> — Sum of Squared Errors. <em>Practical meaning:</em> the raw quantity OLS minimizes before averaging.</div>
+    <div class="glossline"><b>Target</b> — The variable being predicted. <em>Practical meaning:</em> the y-side of the equation.</div>
+    <div class="glossline"><b>Test set</b> — Data held back purely for final evaluation. <em>Practical meaning:</em> your honest estimate of real-world performance.</div>
+    <div class="glossline"><b>Training set</b> — Data used to fit the model's coefficients. <em>Practical meaning:</em> everything the model is allowed to "see" and learn from.</div>
+    <div class="glossline"><b>Underfitting</b> — A model too simple to capture the real pattern. <em>Practical meaning:</em> poor performance on both training and test data.</div>
+    <div class="glossline"><b>Validation set</b> — A held-out split used for tuning decisions before final testing. <em>Practical meaning:</em> keeps the test set untouched until the very end.</div>
+    <div class="glossline"><b>Variance</b> — Error from sensitivity to small fluctuations in training data. <em>Practical meaning:</em> high variance shows up as overfitting.</div>
+
+    <div class="navbtnrow"><a href="#ch32">← Final Knowledge Test</a><a href="#finalchecklist">Next: Final Checklist →</a></div>
+  </section>
+
+  <!-- ================= FINAL CHECKLIST ================= -->
+  <section class="chapter" id="finalchecklist">
+    <span class="chnum">SELF-CHECK</span>
+    <h2>"Can I Explain Linear Regression?" Checklist</h2>
+    <p class="deck">Go through this honestly. Anything unchecked points straight back to a chapter above.</p>
+    <ul class="checklist">
+      <li>I can explain Linear Regression in simple words.</li>
+      <li>I can explain slope and intercept.</li>
+      <li>I understand residuals.</li>
+      <li>I understand why squared errors are used.</li>
+      <li>I understand OLS.</li>
+      <li>I can calculate a simple regression line manually.</li>
+      <li>I understand MSE and RMSE.</li>
+      <li>I understand R².</li>
+      <li>I know how train/test splitting works.</li>
+      <li>I understand Linear Regression assumptions.</li>
+      <li>I can read a residual plot.</li>
+      <li>I understand multicollinearity.</li>
+      <li>I understand overfitting.</li>
+      <li>I understand Ridge and Lasso.</li>
+      <li>I can implement Linear Regression in Python.</li>
+      <li>I can explain Linear Regression in an interview.</li>
+    </ul>
+    <div class="navbtnrow"><a href="#glossary">← Glossary</a><a href="#cover">Back to Cover</a></div>
+  </section>
+
+  </main>
+</div>
+
+<a href="#cover" class="backtop no-print" title="Back to top">↑</a>
+
+<script>
+/* ---------------- Scroll progress + TOC active state ---------------- */
+const progressbar = document.getElementById('progressbar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progressbar.style.width = scrolled + '%';
+});
+function filterToc(q){
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('#tocList a.toclink').forEach(a=>{
+    a.style.display = (!q || a.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+const sections = document.querySelectorAll('.chapter, .cover');
+const tocLinks = document.querySelectorAll('.toclink');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      tocLinks.forEach(l=>l.classList.remove('active'));
+      const link = document.querySelector('.toclink[href="#'+e.target.id+'"]');
+      if(link) link.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'});
+sections.forEach(s=>io.observe(s));
+
+/* ---------------- Shared helpers ---------------- */
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function ols(points){
+  const n = points.length;
+  const mx = points.reduce((s,p)=>s+p.x,0)/n;
+  const my = points.reduce((s,p)=>s+p.y,0)/n;
+  let num=0, den=0;
+  points.forEach(p=>{ num += (p.x-mx)*(p.y-my); den += (p.x-mx)*(p.x-mx); });
+  const b1 = den===0 ? 0 : num/den;
+  const b0 = my - b1*mx;
+  return {b0,b1};
+}
+function sse(points,b0,b1){
+  return points.reduce((s,p)=>{const r=p.y-(b0+b1*p.x); return s+r*r;},0);
+}
+
+/* ================= Slope/Intercept widget (Chapter 2) ================= */
+(function(){
+  const svg = document.getElementById('siSvg');
+  const b0slider = document.getElementById('siB0');
+  const b1slider = document.getElementById('siB1');
+  const readout = document.getElementById('siReadout');
+  const W=600,H=320, ox=60, oy=270, sx=48, sy=22;
+  function xPix(x){return ox + x*sx;}
+  function yPix(y){return oy - y*sy;}
+  function draw(){
+    svg.innerHTML='';
+    // axes
+    svg.appendChild(svgEl('line',{x1:ox,y1:20,x2:ox,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    svg.appendChild(svgEl('line',{x1:ox,y1:oy,x2:570,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    const b0 = parseFloat(b0slider.value), b1 = parseFloat(b1slider.value);
+    const x1=-1, x2=10;
+    const y1 = b0+b1*x1, y2v = b0+b1*x2;
+    svg.appendChild(svgEl('line',{x1:xPix(x1),y1:yPix(y1),x2:xPix(x2),y2:yPix(y2v),stroke:'#6C4AB6','stroke-width':3}));
+    // intercept marker
+    svg.appendChild(svgEl('circle',{cx:xPix(0),cy:yPix(b0),r:5,fill:'#E8558F'}));
+    svg.appendChild(svgEl('text',{x:xPix(0)+8,y:yPix(b0)-8,fill:'#E8558F','font-size':12,'font-family':'Helvetica Neue,Arial'})).textContent='b₀ = '+b0.toFixed(1);
+    readout.textContent = 'Equation: ŷ = '+b0.toFixed(1)+' + ('+b1.toFixed(1)+')·x';
+  }
+  b0slider.addEventListener('input',draw); b1slider.addEventListener('input',draw);
+  draw();
+})();
+
+/* ================= Regression Playground (Chapter 4) ================= */
+(function(){
+  const svg = document.getElementById('pgSvg');
+  const readout = document.getElementById('pgReadout');
+  const btnResid = document.getElementById('pgToggleResid');
+  const btnSq = document.getElementById('pgToggleSq');
+  const btnReset = document.getElementById('pgReset');
+  const initial = [{x:1,y:2},{x:2,y:4},{x:3,y:5},{x:4,y:7},{x:5,y:8}];
+  let points = JSON.parse(JSON.stringify(initial));
+  let showResid=false, showSq=false;
+  const ox=60, oy=290, sx=90, sy=28;
+  function xPix(x){return ox + x*sx;}
+  function yPix(y){return oy - y*sy;}
+  function xVal(px){return (px-ox)/sx;}
+  function yVal(py){return (oy-py)/sy;}
+  function render(){
+    svg.innerHTML='';
+    svg.appendChild(svgEl('line',{x1:ox,y1:20,x2:ox,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    svg.appendChild(svgEl('line',{x1:ox,y1:oy,x2:580,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    const {b0,b1} = ols(points);
+    const totalSSE = sse(points,b0,b1);
+    points.forEach(p=>{
+      const py = yPix(p.y);
+      const predY = b0 + b1*p.x;
+      const ppy = yPix(predY);
+      if(showResid){
+        svg.appendChild(svgEl('line',{x1:xPix(p.x),y1:py,x2:xPix(p.x),y2:ppy,stroke:'#E8558F','stroke-width':2,'stroke-dasharray':'4 3'}));
+      }
+      if(showSq){
+        const r = Math.abs(p.y-predY);
+        const size = r*sy;
+        const top = Math.min(py,ppy);
+        svg.appendChild(svgEl('rect',{x:xPix(p.x), y:top, width:size, height:size, fill:'#E8558F', opacity:0.15}));
+      }
+    });
+    const x1=0, x2=6.5;
+    svg.appendChild(svgEl('line',{x1:xPix(x1),y1:yPix(b0+b1*x1),x2:xPix(x2),y2:yPix(b0+b1*x2),stroke:'#6C4AB6','stroke-width':3}));
+    points.forEach((p,i)=>{
+      const c = svgEl('circle',{cx:xPix(p.x),cy:yPix(p.y),r:8,fill:'#17A398',stroke:'#fff','stroke-width':2,style:'cursor:grab;'});
+      c.addEventListener('pointerdown', (ev)=>startDrag(ev,i));
+      svg.appendChild(c);
+    });
+    readout.textContent = 'ŷ = '+b0.toFixed(2)+' + '+b1.toFixed(2)+'x   |   SSE = '+totalSSE.toFixed(2);
+  }
+  let dragIdx=null;
+  function startDrag(ev,i){ dragIdx=i; svg.setPointerCapture(ev.pointerId); }
+  svg.addEventListener('pointermove',(ev)=>{
+    if(dragIdx===null) return;
+    const rect = svg.getBoundingClientRect();
+    const scaleX = 600/rect.width, scaleY = 340/rect.height;
+    const px = (ev.clientX-rect.left)*scaleX;
+    const py = (ev.clientY-rect.top)*scaleY;
+    let nx = Math.max(0.2, Math.min(6, xVal(px)));
+    let ny = Math.max(0, Math.min(10, yVal(py)));
+    points[dragIdx] = {x:nx, y:ny};
+    render();
+  });
+  window.addEventListener('pointerup',()=>{dragIdx=null;});
+  btnResid.addEventListener('click',()=>{showResid=!showResid; btnResid.classList.toggle('active',showResid); render();});
+  btnSq.addEventListener('click',()=>{showSq=!showSq; btnSq.classList.toggle('active',showSq); render();});
+  btnReset.addEventListener('click',()=>{points=JSON.parse(JSON.stringify(initial)); render();});
+  render();
+})();
+
+/* ================= Gradient Descent (Chapter 9) ================= */
+(function(){
+  const svg = document.getElementById('gdSvg');
+  const lrSlider = document.getElementById('gdLr');
+  const readout = document.getElementById('gdReadout');
+  const W=600,H=260;
+  function cost(x){ return 0.02*(x-8)*(x-8) + 1; } // simple bowl, minimum at x=8
+  function costPix(cx){ // cx in data space 0..16
+    const px = 40 + cx*33;
+    const py = H-30 - cost(cx)*22;
+    return [px,py];
+  }
+  let ballX = 1.0;
+  function draw(){
+    svg.innerHTML='';
+    let path = 'M ';
+    for(let x=0;x<=16;x+=0.25){ const [px,py]=costPix(x); path += px+','+py+' '; }
+    const p = svgEl('path',{d:path.replace('M ','M ').replace(/ (?=\d)/,' L '), fill:'none', stroke:'#6C4AB6','stroke-width':2.5});
+    // build proper path
+    let d2 = '';
+    for(let x=0;x<=16;x+=0.25){ const [px,py]=costPix(x); d2 += (x===0?'M ':'L ')+px+' '+py+' '; }
+    p.setAttribute('d', d2);
+    svg.appendChild(p);
+    const [bx,by] = costPix(ballX);
+    svg.appendChild(svgEl('circle',{cx:bx,cy:by,r:9,fill:'#E8558F',stroke:'#fff','stroke-width':2}));
+    const [mx,my] = costPix(8);
+    svg.appendChild(svgEl('circle',{cx:mx,cy:my,r:3,fill:'#17A398'}));
+    svg.appendChild(svgEl('text',{x:mx-14,y:my+22,'font-size':11,fill:'#17A398','font-family':'Helvetica Neue,Arial'})).textContent='minimum';
+    readout.textContent = 'Position = '+ballX.toFixed(2)+'   |   Cost = '+cost(ballX).toFixed(3);
+  }
+  function gradient(x){ return 0.04*(x-8); }
+  document.getElementById('gdStep').addEventListener('click',()=>{
+    const lr = parseFloat(lrSlider.value);
+    ballX = ballX - lr*gradient(ballX)*10;
+    ballX = Math.max(0,Math.min(16,ballX));
+    draw();
+  });
+  document.getElementById('gdRun').addEventListener('click',()=>{
+    const lr = parseFloat(lrSlider.value);
+    let i=0;
+    const iv = setInterval(()=>{
+      ballX = ballX - lr*gradient(ballX)*10;
+      ballX = Math.max(0,Math.min(16,ballX));
+      draw();
+      i++;
+      if(Math.abs(gradient(ballX))<0.01 || i>60){ clearInterval(iv); }
+    },80);
+  });
+  document.getElementById('gdReset').addEventListener('click',()=>{ballX=1.0; draw();});
+  draw();
+})();
+
+/* ================= Train/Test Split (Chapter 12) ================= */
+(function(){
+  const svg = document.getElementById('ttSvg');
+  const slider = document.getElementById('ttSplit');
+  const readout = document.getElementById('ttReadout');
+  const total = 30;
+  function draw(){
+    svg.innerHTML='';
+    const pct = parseInt(slider.value);
+    const testCount = Math.round(total*pct/100);
+    for(let i=0;i<total;i++){
+      const x = 20 + i*19;
+      const isTest = i >= total-testCount;
+      svg.appendChild(svgEl('circle',{cx:x,cy:70,r:7,fill:isTest?'#17A398':'#6C4AB6'}));
+    }
+    readout.textContent = (total-testCount)+' training rows, '+testCount+' test rows ('+pct+'%)';
+  }
+  slider.addEventListener('input',draw);
+  draw();
+})();
+
+/* ================= R² widget (Chapter 14) ================= */
+(function(){
+  const svg = document.getElementById('r2Svg');
+  const readout = document.getElementById('r2Readout');
+  const btnMean = document.getElementById('r2ToggleMean');
+  const btnModel = document.getElementById('r2ToggleModel');
+  let showMean=true, showModel=true;
+  const pts = [{x:1,y:2},{x:2,y:4},{x:3,y:5},{x:4,y:7},{x:5,y:8}];
+  const {b0,b1} = ols(pts);
+  const meanY = pts.reduce((s,p)=>s+p.y,0)/pts.length;
+  const ox=60, oy=260, sx=90, sy=22;
+  function xPix(x){return ox+x*sx;}
+  function yPix(y){return oy-y*sy;}
+  function draw(){
+    svg.innerHTML='';
+    svg.appendChild(svgEl('line',{x1:ox,y1:20,x2:ox,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    svg.appendChild(svgEl('line',{x1:ox,y1:oy,x2:580,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    if(showMean){
+      svg.appendChild(svgEl('line',{x1:xPix(0),y1:yPix(meanY),x2:xPix(6),y2:yPix(meanY),stroke:'#9A98A8','stroke-width':2,'stroke-dasharray':'5 4'}));
+      pts.forEach(p=>{ svg.appendChild(svgEl('line',{x1:xPix(p.x),y1:yPix(p.y),x2:xPix(p.x),y2:yPix(meanY),stroke:'#9A98A8','stroke-width':6,opacity:0.35})); });
+    }
+    if(showModel){
+      svg.appendChild(svgEl('line',{x1:xPix(0),y1:yPix(b0),x2:xPix(6),y2:yPix(b0+b1*6),stroke:'#6C4AB6','stroke-width':3}));
+      pts.forEach(p=>{ const py=b0+b1*p.x; svg.appendChild(svgEl('line',{x1:xPix(p.x),y1:yPix(p.y),x2:xPix(p.x),y2:yPix(py),stroke:'#6C4AB6','stroke-width':3})); });
+    }
+    pts.forEach(p=>{ svg.appendChild(svgEl('circle',{cx:xPix(p.x),cy:yPix(p.y),r:6,fill:'#17A398'})); });
+    const SSE = sse(pts,b0,b1);
+    const SST = pts.reduce((s,p)=>s+(p.y-meanY)*(p.y-meanY),0);
+    const r2 = 1-SSE/SST;
+    readout.textContent = 'SST (grey) = '+SST.toFixed(2)+'   SSE (purple) = '+SSE.toFixed(2)+'   R² = '+r2.toFixed(3);
+  }
+  btnMean.addEventListener('click',()=>{showMean=!showMean; btnMean.classList.toggle('active',showMean); draw();});
+  btnModel.addEventListener('click',()=>{showModel=!showModel; btnModel.classList.toggle('active',showModel); draw();});
+  draw();
+})();
+
+/* ================= Residual pattern mini-diagrams (Chapter 17) ================= */
+(function(){
+  function scatter(id, genFn){
+    const svg = document.getElementById(id);
+    svg.setAttribute('viewBox','0 0 180 110');
+    svg.appendChild(svgEl('line',{x1:15,y1:55,x2:165,y2:55,stroke:'#C9C6DA','stroke-width':1.5}));
+    for(let i=0;i<22;i++){
+      const x = 18 + i*6.8;
+      const y = 55 + genFn(i,22);
+      svg.appendChild(svgEl('circle',{cx:x,cy:y,r:2.6,fill:'#6C4AB6'}));
+    }
+  }
+  scatter('rpRandom', ()=> (Math.random()-0.5)*40);
+  scatter('rpFunnel', (i,n)=> (Math.random()-0.5)*4*(2+i*1.6));
+  scatter('rpCurve', (i,n)=>{ const t=(i/n)*2-1; return -30*(1-t*t)+ (Math.random()-0.5)*6; });
+})();
+
+/* ================= Outlier influence (Chapter 19) ================= */
+(function(){
+  const svg = document.getElementById('outSvg');
+  const readout = document.getElementById('outReadout');
+  const cluster = [];
+  for(let i=0;i<10;i++){ cluster.push({x:1+i*0.4, y:2+i*0.35+ (Math.sin(i)*0.15)}); }
+  let outlier = {x:5.5, y:1.0};
+  const ox=60, oy=290, sx=85, sy=26;
+  function xPix(x){return ox+x*sx;} function yPix(y){return oy-y*sy;}
+  function xVal(px){return (px-ox)/sx;} function yVal(py){return (oy-py)/sy;}
+  function render(){
+    svg.innerHTML='';
+    svg.appendChild(svgEl('line',{x1:ox,y1:20,x2:ox,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    svg.appendChild(svgEl('line',{x1:ox,y1:oy,x2:580,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    const allPts = cluster.concat([outlier]);
+    const {b0,b1} = ols(allPts);
+    svg.appendChild(svgEl('line',{x1:xPix(0),y1:yPix(b0),x2:xPix(7),y2:yPix(b0+b1*7),stroke:'#6C4AB6','stroke-width':3}));
+    cluster.forEach(p=>{ svg.appendChild(svgEl('circle',{cx:xPix(p.x),cy:yPix(p.y),r:6,fill:'#17A398'})); });
+    const oc = svgEl('circle',{cx:xPix(outlier.x),cy:yPix(outlier.y),r:9,fill:'#E8558F',stroke:'#fff','stroke-width':2,style:'cursor:grab;'});
+    oc.addEventListener('pointerdown',(ev)=>{dragging=true; svg.setPointerCapture(ev.pointerId);});
+    svg.appendChild(oc);
+    readout.textContent = 'Line without outlier vs with: slope shifts from '+ols(cluster).b1.toFixed(2)+' to '+b1.toFixed(2);
+  }
+  let dragging=false;
+  svg.addEventListener('pointermove',(ev)=>{
+    if(!dragging) return;
+    const rect = svg.getBoundingClientRect();
+    const scaleX = 600/rect.width, scaleY = 320/rect.height;
+    const px=(ev.clientX-rect.left)*scaleX, py=(ev.clientY-rect.top)*scaleY;
+    outlier = {x:Math.max(0.2,Math.min(6.8,xVal(px))), y:Math.max(0,Math.min(10,yVal(py)))};
+    render();
+  });
+  window.addEventListener('pointerup',()=>{dragging=false;});
+  document.getElementById('outReset').addEventListener('click',()=>{outlier={x:5.5,y:1.0}; render();});
+  render();
+})();
+
+/* ================= Polynomial fit (Chapter 22) ================= */
+(function(){
+  const svg = document.getElementById('polySvg');
+  const readout = document.getElementById('polyReadout');
+  const btns = document.querySelectorAll('.polyBtn');
+  const pts = [];
+  for(let i=0;i<12;i++){
+    const x = i*0.55;
+    const y = 3 + 2.2*Math.sin(x*0.9) + (Math.random()-0.5)*0.5;
+    pts.push({x, y});
+  }
+  const ox=50, oy=260, sx=80, sy=30;
+  function xPix(x){return ox+x*sx;} function yPix(y){return oy-y*sy;}
+  function polyFit(deg){
+    // simple least squares polynomial fit via normal equations (small degree, small n -> fine numerically for degree<=9 here as a teaching demo)
+    const n = pts.length;
+    const X = pts.map(p=>{ const row=[]; for(let d=0;d<=deg;d++) row.push(Math.pow(p.x,d)); return row; });
+    const y = pts.map(p=>p.y);
+    const XT = X[0].map((_,c)=>X.map(r=>r[c]));
+    const XTX = XT.map(row=>X[0].map((_,c)=>row.reduce((s,v,i)=>s+v*X[i][c],0)));
+    const XTy = XT.map(row=>row.reduce((s,v,i)=>s+v*y[i],0));
+    // Gaussian elimination
+    const m = XTX.length;
+    const A = XTX.map((row,i)=>row.concat([XTy[i]]));
+    for(let i=0;i<m;i++){
+      let piv=i; for(let k=i+1;k<m;k++) if(Math.abs(A[k][i])>Math.abs(A[piv][i])) piv=k;
+      [A[i],A[piv]]=[A[piv],A[i]];
+      if(Math.abs(A[i][i])<1e-9) continue;
+      for(let k=i+1;k<m;k++){ const f=A[k][i]/A[i][i]; for(let j=i;j<=m;j++) A[k][j]-=f*A[i][j]; }
+    }
+    const coef = new Array(m).fill(0);
+    for(let i=m-1;i>=0;i--){
+      let s=A[i][m];
+      for(let j=i+1;j<m;j++) s-=A[i][j]*coef[j];
+      coef[i] = Math.abs(A[i][i])<1e-9 ? 0 : s/A[i][i];
+    }
+    return coef;
+  }
+  function evalPoly(coef,x){ return coef.reduce((s,c,d)=>s+c*Math.pow(x,d),0); }
+  function draw(deg){
+    svg.innerHTML='';
+    svg.appendChild(svgEl('line',{x1:ox,y1:20,x2:ox,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    svg.appendChild(svgEl('line',{x1:ox,y1:oy,x2:580,y2:oy,stroke:'#C9C6DA','stroke-width':1.5}));
+    const coef = polyFit(deg);
+    let d='';
+    for(let x=0;x<=6.6;x+=0.08){ const y=evalPoly(coef,x); const py=yPix(y); const px=xPix(x); if(py>-50&&py<400) d+=(x===0?'M ':'L ')+px+' '+py+' '; }
+    svg.appendChild(svgEl('path',{d, fill:'none', stroke:'#6C4AB6','stroke-width':3}));
+    pts.forEach(p=>{ svg.appendChild(svgEl('circle',{cx:xPix(p.x),cy:yPix(p.y),r:5,fill:'#17A398'})); });
+    const trainSSE = pts.reduce((s,p)=>{ const r=p.y-evalPoly(coef,p.x); return s+r*r; },0);
+    const label = deg===1?'Degree 1 — underfit: misses the curve entirely.':(deg===2?'Degree 2 — good fit: captures the pattern.':'Degree 9 — overfit: chases every wiggle, including noise.');
+    readout.textContent = label+'  Training SSE = '+trainSSE.toFixed(2);
+  }
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    draw(parseInt(b.dataset.deg));
+  }));
+  draw(1);
+})();
+
+/* ================= Ridge vs Lasso shrinkage (Chapter 23) ================= */
+(function(){
+  const svg = document.getElementById('rlSvg');
+  const lambdaSlider = document.getElementById('rlLambda');
+  const readout = document.getElementById('rlReadout');
+  const baseCoefs = [4.2, -2.8, 1.5, 0.8, -0.4];
+  function shrink(mode, lambda){
+    return baseCoefs.map(c=>{
+      if(mode==='ridge'){ return c/(1+lambda*0.3); }
+      else{
+        const shrinkAmt = lambda*0.5;
+        if(Math.abs(c) <= shrinkAmt) return 0;
+        return c - Math.sign(c)*shrinkAmt;
+      }
+    });
+  }
+  function draw(){
+    svg.innerHTML='';
+    const mode = document.querySelector('input[name=rlMode]:checked').value;
+    const lambda = parseFloat(lambdaSlider.value);
+    const vals = shrink(mode, lambda);
+    const midY = 130, scale=20;
+    svg.appendChild(svgEl('line',{x1:30,y1:midY,x2:570,y2:midY,stroke:'#C9C6DA','stroke-width':1.5}));
+    vals.forEach((v,i)=>{
+      const x = 80 + i*100;
+      const h = v*scale;
+      svg.appendChild(svgEl('rect',{x:x-20, y: h>=0?midY-h:midY, width:40, height:Math.abs(h), fill: v===0? '#C9C6DA' : (mode==='lasso'?'#E8558F':'#6C4AB6')}));
+      svg.appendChild(svgEl('text',{x:x, y:midY+18+(h<0?Math.abs(h):0), 'text-anchor':'middle', 'font-size':12, 'font-family':'Helvetica Neue,Arial', fill:'#54525E'})).textContent = 'b'+(i+1);
+      svg.appendChild(svgEl('text',{x:x, y: h>=0?midY-h-6:midY-h+16, 'text-anchor':'middle', 'font-size':11, 'font-family':'Helvetica Neue,Arial', fill:'#23222A'})).textContent = v.toFixed(2);
+    });
+    const zeros = vals.filter(v=>v===0).length;
+    readout.textContent = mode==='lasso' ? (zeros+' of 5 coefficients zeroed at λ='+lambda) : ('Ridge shrinks smoothly at λ='+lambda+' — none reach exactly zero.');
+  }
+  lambdaSlider.addEventListener('input',draw);
+  document.querySelectorAll('input[name=rlMode]').forEach(r=>r.addEventListener('change',draw));
+  draw();
+})();
+</script>
+</body>
+</html>
